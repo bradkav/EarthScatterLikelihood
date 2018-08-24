@@ -10,6 +10,8 @@ Experimental parameters are currently hard-coded in the module `expt.f90`. If yo
 
 The event generator should be fast - it shouldn't take more than about 10-20 seconds no matter how many events you need to generate. The likelihood calculators should also be reasonably fast. For the full likelihood, you should be able to do about 100 evaluations/second with O(1000) events. If you want to use the energy-only likelihood, it's a little slower (because there's an extra time integral), but this can probably be sped up using some kind of pre-tabulation.
 
+**NB: Requires results of the DaMaSCUS simulations...**
+
 #### Use
 
 
