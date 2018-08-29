@@ -2,7 +2,7 @@ module DDrate
 
 use utils      
 use modulation
-use expt, only: resolution, lon_det, lat_det
+use expt, only: resolution, resolution_integrated, lon_det, lat_det, sigma_E
 
 implicit none
 
@@ -10,6 +10,9 @@ double precision :: rho0, amu
 parameter (rho0 = 3d-1)
 parameter (amu = 931.5d3) !Define conversion factor from amu-->keV
 
+
+integer :: N_smooth
+parameter (N_smooth = 11)
       
 contains      
       
@@ -125,12 +128,29 @@ function dRdE(E, t, A, m_x, sigma_SI)
 end function dRdE
 
 !Standard Spin-Independent recoil rate
-! as above, but includes threshold/resolution correction
+! as above, but includes resolution correction
 function dRdE_res(E, t, A, m_x, sigma_SI)
     double precision :: E, A, m_x, sigma_SI, dRdE_res
     double precision :: t
     
-    dRdE_res = resolution(E)*dRdE(E, t, A, m_x, sigma_SI)
+    double precision :: Elist(N_smooth), reslist(N_smooth), dRdElist(N_smooth)
+    
+    integer :: i
+    
+    Elist = 10**linspace(log10(max(E - sigma_E*5.0, 1d-4)), log10(E + sigma_E*5.0), N_smooth)
+    
+    
+    do i = 1, N_smooth
+        reslist(i) = resolution(Elist(i),E)
+        
+        if (Elist(i) < 0) then
+            dRdElist(i) = 0
+        else
+            dRdElist(i) = dRdE(Elist(i), t, A, m_x, sigma_SI)
+        end if
+    end do
+    
+    dRdE_res = trapz(Elist, reslist*dRdElist)
 end function dRdE_res
 
 
@@ -144,7 +164,7 @@ function dRdE_free(E, A, m_x, sigma_SI)
     dRdE_free = rate_prefactor(m_x)*int_factor*calcEta_free(vmin(E, A, m_x))
 end function dRdE_free
 
-! Recoild rate
+! Recoil rate
 ! Including resolution and integrating over time [t0, t1]
 function dRdE_res_tint(E, t0, t1, A, m_x, sigma_SI)
     double precision :: A, m_x, sigma_SI, dRdE_res_tint
@@ -152,13 +172,17 @@ function dRdE_res_tint(E, t0, t1, A, m_x, sigma_SI)
     integer :: Nt = 200
 
     double precision, allocatable :: tlist(:)
-    double precision, allocatable :: integvals(:)
+    double precision, allocatable :: integvals(:,:), tmp(:)
+    
+    double precision :: Elist(N_smooth), reslist(N_smooth)
     double precision :: dt
     
-    integer :: i_t
+    integer :: i_t, i_E
     
     allocate(tlist(Nt))
-    allocate(integvals(Nt))
+    allocate(integvals(N_smooth,Nt))
+    allocate(tmp(Nt))
+    
     
     dt = (t1 - 1d0 - t0)/3d0
     
@@ -168,15 +192,27 @@ function dRdE_res_tint(E, t0, t1, A, m_x, sigma_SI)
         tlist((1+i_t*50):((i_t+1)*50)) = linspace(t0 + i_t*dt, t0 + i_t*dt + 1d0, 50)
     end do
     
+    Elist = 10**linspace(log10(max(E - sigma_E*5.0, 1d-4)), log10(E + sigma_E*5.0), N_smooth) 
+    
     !write(*,*) Elist
     do i_t = 1, Nt
-        integvals(i_t) = resolution(E)*dRdE(E, tlist(i_t), A, m_x, sigma_SI)
+        do i_E = 1, N_smooth
+            integvals(i_E, i_t) = resolution(E, Elist(i_E))*dRdE(Elist(i_E), tlist(i_t), A, m_x, sigma_SI)
+        end do
     end do
     
-    dRdE_res_tint = trapz(tlist, integvals)
+    !dRdE_res_tint = trapz(tlist, integvals)
+    !Integrate over energies
+    do i_t = 1, Nt
+        tmp(i_t) = trapz(Elist, integvals(:, i_t))
+    end do
+    
+    !Integrate over time
+    dRdE_res_tint = trapz(tlist, tmp)
         
     deallocate(tlist)
     deallocate(integvals)
+    deallocate(tmp)
         
 end function dRdE_res_tint
 
@@ -218,7 +254,7 @@ function Nevents(E0, E1, t0, t1, A, m_x, sigma_SI)
     Elist = 10**(linspace(log10(E0), log10(E1), NE))
     
     do i_E = 1, NE
-        reslist(i_E) = resolution(Elist(i_E))
+        reslist(i_E) = resolution_integrated(Elist(i_E))
     end do 
     
     ! Calculate the rate (including resolution) on a grid of (E, t) values
@@ -261,7 +297,7 @@ function Nevents_fixedt(E0, E1, t, A, m_x, sigma_SI)
     Elist = 10**(linspace(log10(E0), log10(E1), NE))
     
     do i_E = 1, NE
-        integvals(i_E) = resolution(Elist(i_E))*dRdE(Elist(i_E), t, A, m_x, sigma_SI)
+        integvals(i_E) = resolution_integrated(Elist(i_E))*dRdE(Elist(i_E), t, A, m_x, sigma_SI)
     end do
     
     Nevents_fixedt = trapz(Elist, integvals)

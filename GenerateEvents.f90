@@ -115,15 +115,11 @@ allocate(reslist(NE))
 allocate(rate(NE))
 allocate(cum_rate(NE))
 
-Elist = 10**(linspace(log10(E_min), log10(E_max), NE))
-
-do i_E = 1, NE
-    reslist(i_E) = resolution(Elist(i_E))
-end do 
+Elist = 10**(linspace(log10(E_th), log10(E_max), NE))
 
 do i = 1, N_obs
     do i_E = 1, NE
-        rate(i_E) = (rho/rho0)*m_det*reslist(i_E)*dRdE(Elist(i_E), events_t(i), A_det, m_x, sigma_SI)
+        rate(i_E) = (rho/rho0)*m_det*dRdE_res(Elist(i_E), events_t(i), A_det, m_x, sigma_SI)
     end do
     
     !Find the point where the rate drops to zero,
