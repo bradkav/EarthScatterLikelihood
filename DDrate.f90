@@ -2,7 +2,7 @@ module DDrate
 
 use utils      
 use modulation
-use expt, only: resolution, resolution_integrated, lon_det, lat_det, sigma_E
+use expt, only: resolution, resolution_integrated, lon_det, lat_det, sigma_E, E_min, E_max
 
 implicit none
 
@@ -123,8 +123,9 @@ function dRdE(E, t, A, m_x, sigma_SI)
 
     int_factor = sigma_SI*calcSIFormFactor(E, A)*(A**2)
     
-    dRdE = (interp_rho_scalar(sigma_SI, angle)/rho0)*rate_prefactor(m_x) &
-        *int_factor*interp_eta_scalar(sigma_SI, angle, vmin(E, A, m_x))
+    !
+    dRdE = (interp_rho_scalar(m_x, sigma_SI, angle)/rho0)*rate_prefactor(m_x) &
+        *int_factor*interp_eta_full(m_x, sigma_SI, angle, vmin(E, A, m_x))
 end function dRdE
 
 !Standard Spin-Independent recoil rate
@@ -242,7 +243,7 @@ function Nevents(E0, E1, t0, t1, A, m_x, sigma_SI)
     
     if ((t1 - t0) < 4d0) then
         write (*,*) "    WARNING! DDrate.f90: Nevents: Calculation may not work for exposures"
-        write (*,*) "    shorter than a few days..."
+        write (*,*) "    shorter than a few days. Try Nevents_short instead..."
     end if
     
     !Note: you have to do more than 4 days of exposure for this to work...
@@ -279,6 +280,50 @@ function Nevents(E0, E1, t0, t1, A, m_x, sigma_SI)
     deallocate(reslist)
         
 end function Nevents
+
+
+! Total number of events in the energy range [E0, E1]
+! and over a (short ~ days) time interval [t0, t1]
+function Nevents_short(E0, E1, t0, t1, A, m_x, sigma_SI)
+    double precision :: A, m_x, sigma_SI, Nevents_short
+    double precision :: E0, E1, t0, t1
+    integer :: Nt
+    integer :: NE
+    
+    parameter (Nt = 12)
+    parameter (NE = 10)
+    
+    double precision :: tlist(Nt), Elist(NE), tmp(Nt)
+    double precision :: integvals(NE, Nt), reslist(NE)
+    double precision :: dt
+    
+    
+    
+    integer :: i_t, i_E
+    tlist = linspace(t0, t1, Nt)
+
+    Elist = 10**(linspace(log10(E_min), log10(E_max), NE))
+    
+    do i_E = 1, NE
+        reslist(i_E) = resolution_integrated(Elist(i_E), E0, E1)
+    end do 
+    
+    ! Calculate the rate (including resolution) on a grid of (E, t) values
+    do i_E = 1, NE
+        do i_t = 1, Nt
+            integvals(i_E, i_t) = reslist(i_E)*dRdE(Elist(i_E), tlist(i_t), A, m_x, sigma_SI)
+        end do
+    end do
+    
+    !Integrate over energies
+    do i_t = 1, Nt
+        tmp(i_t) = trapz(Elist, integvals(:, i_t))
+    end do
+    
+    !Integrate over time
+    Nevents_short = trapz(tlist, tmp)
+        
+end function Nevents_short
 
 ! Number of events in recoil range [E0, E1] at fixed time t
 function Nevents_fixedt(E0, E1, t, A, m_x, sigma_SI)

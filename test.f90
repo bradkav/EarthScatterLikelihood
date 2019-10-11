@@ -8,29 +8,40 @@ use like
 
 implicit none
 
-double precision :: siglist(100)
+integer N_loop
+parameter (N_loop = 200)
 
-integer :: i_loop, N_loop
-double precision :: slhood(100), slhood_Eonly(100), slhood_counts(100)
+double precision siglist(N_loop)
+
+integer :: i_loop
+double precision :: slhood(N_loop), slhood_Eonly(N_loop), slhood_counts(N_loop)
  
-double precision :: Cube(2)
+double precision :: Cube(3)
 
 
 write(*,*) "    Testing likelihood calculator..."
 
-!Cross section and local DM density
-Cube = (/ 0d0, 0.3d0 /)
+!Mass, Cross section and local DM density
+Cube = (/ 0.35d0, 0d0, 0.3d0 /)
 
-N_loop = 100
-siglist = 10**linspace(-37d0,log10(300d-36),N_loop)
+
+siglist = 10**linspace(-34d0,-30d0,N_loop)
+
+
+
 
 !Calculate likelihoods as a function of cross section
 do i_loop = 1, N_loop
-    Cube(1) = siglist(i_loop)
-    call slikelihood(Cube,slhood(i_loop))
-    call slikelihood_Eonly(Cube,slhood_Eonly(i_loop))
-    call slikelihood_counts(Cube,slhood_counts(i_loop))
+    !write(*,*) i_loop
+    Cube(2) = siglist(i_loop)
+    call loglike(Cube,slhood(i_loop),binned=.True.)
+    call loglike_Eonly(Cube,slhood_Eonly(i_loop),binned=.True.)
+    call loglike_counts(Cube,slhood_counts(i_loop),binned=.True.)
 end do
+
+!do i_loop = 1, N_loop
+!    write(*,*) siglist(i_loop), interp_rho_scalar(0.3d0, siglist(i_loop), 25d0)   
+!end do
 
 !Save to file
 write(*,*) "    Saving to file <likes.txt>..."

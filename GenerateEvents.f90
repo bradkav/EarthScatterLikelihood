@@ -1,7 +1,8 @@
 program GenerateEvents
     !Run from the command line
-    ! ./GenerateEvents SIGMA_SI RHO
+    ! ./GenerateEvents M_X SIGMA_SI RHO
     ! where 
+    !   - M_X is the WIMP mass in GeV
     !   - SIGMA_SI is the WIMP-nucleon xsec in cm^2
     !   - RHO is the local density in GeV/cm^3
     
@@ -42,17 +43,19 @@ double precision, allocatable :: rate(:), cum_rate(:)
 !Load in cross section and density from the command line
 character(len=100) :: input_str
 call getarg(1, input_str)
-read(input_str,*) sigma_SI
+read(input_str, *) m_x
 
 call getarg(2, input_str)
+read(input_str,*) sigma_SI
+
+call getarg(3, input_str)
 read(input_str,*) rho
 
 write(*,*) "Generating events using:"
+write(*,*) "    m_x [GeV]:", sigma_SI
 write(*,*) "    sigma_SI [cm^2]:", sigma_SI
 write(*,*) "    rho [GeV/cm^3]:", rho
 
-!Fix DM mass
-m_x = 5d-1
 
 
 ! Initialise seed for rng 

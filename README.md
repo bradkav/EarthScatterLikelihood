@@ -1,46 +1,63 @@
 ## Likelihood calculator for Earth-scattering DM
 
+**Last Update:** 11/10/2019
+
 #### Summary
 
-Currently, the likelihood calculator and event generator use **a fixed DM mass (0.5 GeV)**, because we only have DaMaSCUS simulations for this mass. The free parameters are therefore the DM cross section and local DM density. Because we only have a finite number of simulations, the code only works for cross sections in the range [1e-45, 3e-34] cm^2.
+The likelihood calculator and event generator currently work in the ranges:
 
-Everything is written in fortran. It should conform to the fortran95 standard and it should compile straightforwardly using the Makefile: this will make all the modules, as well as `test` (used for testing the likelihood calculator) and `GenerateEvents` which is the command-line event generator (see below). Let me know if there are any problems compiling or interfacing with MultiNest.
+* m_x = [0.1, 0.5] GeV  
+* sigma_p^SI = [1e-40, 1e-30] cm^2
 
-Experimental parameters are currently hard-coded in the module `expt.f90`. If you want to change the resolution, mass, exposure, latitude, etc., just edit the appropriate parameter in `expt.f90`. In future, we can do something more sophisticated and read the parameters from file.
+For now, we should limit our search to this range - I'm working on extending to lower masses using some kind of scaling relations. Higher cross sections can possibly be accomodated with some approximations.
 
-The event generator should be fast - it shouldn't take more than about 10-20 seconds no matter how many events you need to generate. The likelihood calculators should also be reasonably fast. For the full likelihood, you should be able to do about 100 evaluations/second with O(1000) events. If you want to use the energy-only likelihood, it's a little slower (because there's an extra time integral), but this can probably be sped up using some kind of pre-tabulation.
+Everything is written in fortran. It should conform to the fortran95 standard and it should compile straightforwardly using the Makefile: this will make all the modules, as well as `test` (used for testing the likelihood calculator),  `GenerateEvents` and `GenerateEvents_Asimov` which are the command-line event generators (see below). Let me know if there are any problems compiling or interfacing with MultiNest.
 
-**NB: Requires results of the DaMaSCUS simulations...**
+Experimental parameters are currently hard-coded in the module `expt.f90`. If you want to change the resolution, mass, exposure, latitude, background rate etc., just edit the appropriate parameter in `expt.f90`. In future, we can do something more sophisticated and read the parameters from file.
+
+The event generator should be fast - it shouldn't take more than about 10-20 seconds no matter how many events you need to generate. The likelihood calculators should also be reasonably fast. For the full likelihood, you should be able to do about 100 evaluations/second with O(1000) events. If you're evaluating the binned Asimov likelihood, it's a little slower - perhaps 50 evaluations/per second (for 12 time bins and 12 energy bins).
+
+**NB: Requires results of the DaMaSCUS simulations.**
 
 #### Use
 
 
-You can generate events by running 
+You can generate a random sample of events by running 
 
 ```
-./GenerateEvents SIGMA_SI RHO
+./GenerateEvents M_X SIGMA_SI RHO
 ```
 where
 
+* M_X is the WIMP mass in GeV
 * SIGMA_SI is the WIMP-nucleon xsec in cm^2
 * RHO is the local density in GeV/cm^3
 
 This will generate a sample of events and save it in the file `events.txt` (the first column contains the event times in Julian days, the second column event energies in keV).
 
-Once you have an `events.txt` file, you can run `./test`, which will test the likelihood calculator after loading in `events.txt`. It will spit out the file `likes.txt` which contains a list of cross section values (column 1), followed by log-likelihood values (columns 2-4, including energy+time, energy-only and counts-only).
+You can also generate a binned asimov dataset by running
+
+```
+./GenerateEvents_Asimov M_X SIGMA_SI RHO
+```
+
+This will output `events_Asimov.txt` (the first column contains the centres of the bins in time, the second the centres of the logarithmic bins in energy, and the third the expected number of events in each bin). You can change the number of bins in t and E by editing the `GenerateEvents_Asimov.f90` file directly, but for now it's 12 bins in each direction, which should be fine).
+
+Once you have an `events_Asimov.txt`, you can run `./test`, which will test the likelihood calculator after loading in `events_Asimov.txt`. It will spit out the file `likes.txt` which contains a list of cross section values (column 1), followed by log-likelihood values (columns 2-4, including energy+time, energy-only and counts-only). There's also `./GridLike` which will calculate the likelihood on a 2-D grid of cross section and density (at fixed mass).
 
 The subroutines for calculating likelihoods are in `like.f90`:
 
-* `slikelihood` - calculate the unbinned likelihood including event energies and timing
-* `slikelihood_Eonly` - calculate the unbinned likelihood including only event energies
-* `slikelihood_counts` - calculate Poisson likelihood for the observed number of counts
+* `loglike` - calculate the unbinned likelihood including event energies and timing
+* `loglike_Eonly` - calculate the unbinned likelihood including only event energies
+* `loglike_counts` - calculate Poisson likelihood for the observed number of counts
 
 Each subroutine accepts two arguments:
 
 * `Cube` - which is the array of parameter. For now, this should be the cross section and local DM density.
 * `slhood` - the output variable, to which the log-likelihood is assigned.
+* `binned` - [optional, default=.False.] if `.True.`, use binned Asimov data for calculating the likelihood.
 
-Hopefully these should be easy enough to interface with MultiNest.
+Hopefully these should be easy enough to interface with MultiNest (there's an example wrapper function for `slikelihood` in `like.f90`).
 
 Note that you should always call the `initialise_modulation` subroutine (from `modulation.f90`) before doing any calculations of DD rates, in order to load in the tabulated velocity distributions. Don't worry about calling it multiple times, it will only load in the tables the first time it's called. 
 
@@ -53,19 +70,24 @@ Note that you should always call the `initialise_modulation` subroutine (from `m
 * `modulation.f90` - functions for loading in, storing and interpolating the results of the DaMaSCUS simulations for the local DM density and velocity distribution.
 * `DDrate.f90` - functions for calculating direct detection scattering rates, velocity integrals, event numbers etc.
 * `expt.f90` - contains (hard-coded) experimental parameters (such as exposure time, detector mass, resolution, latitude, etc.)
-* `GenerateEvents.f90` - event generator, samples recoil events for a given cross section and local density and saves the results to file.
+* `GenerateEvents.f90` - event generator, samples recoil events for a given mass, cross section and local density and saves the results to file.
+* `GenerateEvents_Asimov.f90` - Asimov event generator.
 * `rnglib.f90` and `ranlib_poisson.f90` - random number generators needed to generate Poisson random variables. Note that these files have been taken and adapted from https://people.sc.fsu.edu/~jburkardt/f_src/rnglib/rnglib.html. It's possible that some of these could be removed and consolidated if you can come up with a simple Poisson generator. 
 
 #### The inner workings
 
-The basic idea is that calling `initialise_modulation` will read in all the velocity and density tables, ready to interpolate. Then when you call `dRdE(E, t, ...)` (the event rate), it calculates the isodetection angle of the detector at time `t`, calculates the value of `vmin` corresponding to `E` and then performs a linear interpolation to get the correct value of eta, the velocity integral. It's actually a 3-dimensional interpolation, because it also interpolates for the value of the cross section (in this case though, it's a linear interpolation in log10(sigma_SI), which turns out to give much smoother results). 
+The basic idea is that calling `initialise_modulation` will read in all the velocity and density tables, ready to interpolate. Then when you call `dRdE(E, t, ...)` (the event rate), it calculates the isodetection angle of the detector at time `t`, calculates the value of `vmin` corresponding to `E` and then performs a linear interpolation to get the correct value of eta, the velocity integral. It's actually a 4-dimensional interpolation, because it also interpolates for the value of the mass and cross section (in this case though, it's a linear interpolation in log10(m) and log10(sigma_SI), which turns out to give much smoother results). 
 
 There's also a similar interpolation which happens for the value of the local density at a given isodetection angle (and cross section).
 
 Functions like `Nevents` then just integrate over time and energy to obtain the number of events per kg of detector. We then just multiply by the detector mass and any correction if we want to change the 'free' value of the local density and this gives the total event rate. There are a number of other functions which calculate, for example, the number of events at a fixed time (`Nevents_fixedt`) or the recoil spectrum integrated over time (`dRdE_res_tint`).
 
+The event rate calculations include a fixed flat background rate (`BG_rate` in `expt.f90`).
+
 #### To-Do
 
 * Add header information to events.txt files
-* Add backgrounds and background likelihood
 * Improve bounds-checking in `interp_eta_scalar` (in `modulation.f90`)
+* Write a set of standard tests and make sure that the codes agree between here and dropbox...
+* Update the `Nevents` calculation so that `E_max` is larger and intrinsic (i.e. doesn't need to be fed to the code...)
+* Extend to lower values of m_x by using scaling relations
