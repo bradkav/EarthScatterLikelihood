@@ -17,7 +17,7 @@ Experimental parameters are currently hard-coded in the module `expt.f90`. If yo
 
 The event generator should be fast - it shouldn't take more than about 10-20 seconds no matter how many events you need to generate. The likelihood calculators should also be reasonably fast. For the full likelihood, you should be able to do about 100 evaluations/second with O(1000) events. If you're evaluating the binned Asimov likelihood, it's a little slower - perhaps 50 evaluations/per second (for 12 time bins and 12 energy bins).
 
-**NB: Requires results of the DaMaSCUS simulations.**
+**NB: Requires results of the DaMaSCUS simulations.** The location of the DaMaSCUS simulation results can be specified as `data_dir` in the file `modulation.f90`.
 
 #### Use
 
@@ -51,7 +51,7 @@ The subroutines for calculating likelihoods are in `like.f90`:
 * `loglike_Eonly` - calculate the unbinned likelihood including only event energies
 * `loglike_counts` - calculate Poisson likelihood for the observed number of counts
 
-Each subroutine accepts two arguments:
+Each subroutine accepts three arguments:
 
 * `Cube` - which is the array of parameter. For now, this should be the cross section and local DM density.
 * `slhood` - the output variable, to which the log-likelihood is assigned.
