@@ -80,6 +80,9 @@ end subroutine loadEvents
 subroutine slikelihood(Cube,slhood)
     
     double precision Cube(nest_nPar),slhood
+    
+    !Here, we call the likelihood function including energy and timing info
+    !binned=.True. specifies that we want to use the binned data in 'events_Asimov.txt'
     call loglike(Cube,slhood,binned=.True.)
     
 end subroutine slikelihood
