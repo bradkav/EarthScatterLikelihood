@@ -1,6 +1,6 @@
 ## Likelihood calculator for Earth-scattering DM
 
-**Last Update:** 11/10/2019
+**Last Update:** 09/12/2019
 
 #### Summary
 
@@ -63,7 +63,10 @@ Note that you should always call the `initialise_modulation` subroutine (from `m
 
 #### Reconstructions
 
-To run the parameter reconstructions, run `./testStat 1 False`.
+To run the parameter reconstructions, run 
+```
+./testStat 1 False
+```
 
 #### List of files:
 
