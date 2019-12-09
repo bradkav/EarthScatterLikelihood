@@ -6,7 +6,7 @@ use LabFuncs
 implicit none
      
 character(len=*) :: data_dir
-parameter (data_dir = '../../DaMaSCUS_results/')
+parameter (data_dir = './DaMaSCUS_results/')
       
 double precision :: vlag, sigmav, vesc
 parameter (vlag = 230d0)
@@ -18,7 +18,7 @@ integer :: Nv, Nang, Nsigma, Nmass
 parameter (Nv = 200)
 !parameter (Nang = 180)
 parameter (Nang = 36)
-parameter (Nsigma = 5)
+parameter (Nsigma = 10)
 parameter (Nmass = 4)
 
 double precision :: vel_grid(Nv)
@@ -33,7 +33,7 @@ logical :: modulation_initialised = .False.
 
 double precision :: sigma_vals(Nsigma)
 double precision :: mass_vals(Nmass)
-parameter (sigma_vals = (/1d-40, 1d-33, 1d-32, 1d-31, 1d-30 /) )
+parameter (sigma_vals = (/1d-40, 1d-38, 1d-37, 1d-36, 1d-35, 1d-34, 1d-33, 1d-32, 1d-31, 1d-30 /) )
 parameter (mass_vals = (/0.100, 0.171, 0.292, 0.500 /) )
      
 !character(len=4) :: simID(Nsigma)
