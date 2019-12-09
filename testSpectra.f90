@@ -29,7 +29,7 @@ Elist = 10**linspace(-3d0, log10(2d0), N)
 
 t0 = 1d5
 A = 73d0
-m_x = 0.5d0
+m_x = 0.2d0
 sigma_SI = 1d-34
 
 write(*,*) Nevents_fixedt(1d-4, 2d0, t0, A, m_x, sigma_SI)

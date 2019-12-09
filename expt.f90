@@ -31,7 +31,8 @@ parameter (E_min = 1d-4)
 !Background parameters
 !Events per keV per kg per day (flat spectrum)
 double precision :: BG_rate
-parameter (BG_rate = 10.0)             
+parameter (BG_rate = 10.0)
+!parameter (BG_rate = 1d-5)
 
 !Mass number
 double precision :: A_det

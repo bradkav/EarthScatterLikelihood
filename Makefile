@@ -3,9 +3,9 @@ FFLAGS = -O3 -std=f95 -fall-intrinsics
 #-Wall 
 
 
-OBJECTS = rnglib.o ranlib_poisson.o LabFuncs.o utils.o expt.o  modulation.o DDrate.o like.o
+OBJECTS = rnglib.o ranlib_poisson.o LabFuncs.o utils.o expt.o  modulation.o DDrate.o like.o cdf.o d1mach.o dzero.o stat.o
 
-all: test GenerateEvents GenerateEvents_Asimov GridLike testSpectra
+all: test GenerateEvents GenerateEvents_Asimov GridLike testSpectra testStat
 
 test: $(OBJECTS)
 	$(FC) $(FFLAGS) -o test test.f90 $(OBJECTS)
@@ -13,6 +13,8 @@ test: $(OBJECTS)
 testSpectra: $(OBJECTS)
 	$(FC) $(FFLAGS) -o testSpectra testSpectra.f90 $(OBJECTS)
 
+testStat: $(OBJECTS)
+	$(FC) $(FFLAGS) -o testStat testStat.f90 $(OBJECTS)
 
 GridLike: $(OBJECTS)
 	$(FC) $(FFLAGS) -o GridLike GridLike.f90 $(OBJECTS)
@@ -35,3 +37,4 @@ clean:
 	rm -f GridLike
 	rm -f GridLike2
 	rm -f testSpectra 
+	rm -f testStat

@@ -51,7 +51,8 @@ subroutine loadEvents(binned)
                 !Add the final entry onto the list of bin edges
                 t_edges(N_tbins + 1) = 2*t_edges(N_tbins) - t_edges(N_tbins - 1)
                 E_edges(N_Ebins + 1) = 10**(2*log10(E_edges(N_Ebins)) - log10(E_edges(N_Ebins - 1)))
-                
+                !write(*,*) t_edges
+                !write(*,*) E_edges
                 
                 !N_obs = sum(sum(N_binned,DIM=2))
             end if

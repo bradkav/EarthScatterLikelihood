@@ -27,11 +27,13 @@ double precision :: slhood(N_loop*N_loop2), slhood_Eonly(N_loop*N_loop2), slhood
 write(*,*) "    Testing likelihood calculator..."
 
 !Mass, Cross section and local DM density
-Cube = (/ 0.35d0, 0d0, 0.3d0 /)
+Cube = (/ 0.2d0, 0d0, 0.3d0 /)
 
-siglist = 10**linspace(-33d0,-30d0, N_loop)
+siglist = 0.7*10**linspace(-34.3d0,-33.3d0, N_loop)
 !rholist(1) = 0.3
-rholist = 0.3*10**linspace(-1d0, 1d0, N_loop2)
+!rholist = 10**linspace(-35d0,-33d0, N_loop)
+!rholist = 0.4*10**linspace(-1d0, 1d0, N_loop2)
+rholist = linspace(0.0d0, 1.0d0, N_loop2)
 
 
 !Calculate likelihoods as a function of cross section
@@ -41,7 +43,7 @@ do i_loop = 1, N_loop
     do i_loop2 = 1, N_loop2
         Cube(3) = rholist(i_loop2)!/siglist(i_loop)
         call loglike(Cube,slhood(i_loop + N_loop*(i_loop2-1)), binned=.True.)
-        call loglike_Eonly(Cube,slhood_Eonly(i_loop + N_loop*(i_loop2-1)), binned=.True.)
+        !call loglike_Eonly(Cube,slhood_Eonly(i_loop + N_loop*(i_loop2-1)), binned=.True.)
         !call slikelihood_counts(Cube,slhood_counts(i_loop + N_loop*(i_loop2-1)))
     end do
 end do

@@ -61,6 +61,10 @@ Hopefully these should be easy enough to interface with MultiNest (there's an ex
 
 Note that you should always call the `initialise_modulation` subroutine (from `modulation.f90`) before doing any calculations of DD rates, in order to load in the tabulated velocity distributions. Don't worry about calling it multiple times, it will only load in the tables the first time it's called. 
 
+#### Reconstructions
+
+To run the parameter reconstructions, run `./testStat 1 False`.
+
 #### List of files:
 
 * `test.f90` - some testing code that I'm using to make sure that all the calculations are correct.
