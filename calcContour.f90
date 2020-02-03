@@ -2,6 +2,8 @@ program calcContour
 
 use stat
 
+use expt, only: lat_det
+
 implicit none
 
 integer :: i, j, nmx, i_E, i_t, N_bench
@@ -29,6 +31,9 @@ call getarg(3, input_str)
 read(input_str,*) data
 
 call getarg(4, input_str)
+read(input_str,*) lat_det
+
+call getarg(5, input_str)
 read(input_str,*) outpath
 
 

@@ -39,11 +39,13 @@ double precision :: A_det
 parameter (A_det = 73d0)
 
 !Latitude and longitude of detector
-double precision :: lon_det, lat_det
+double precision :: lon_det = 13.576d0
+double precision :: lat_det = 45.454d0
 
 !Here we use the values for LNGS
-parameter (lon_det = 13.576d0)  
-parameter (lat_det = -45.454d0)
+
+!parameter (lon_det = 13.576d0)  
+!parameter (lat_det = -45.454d0)
 !parameter (lat_det = -45.454d0)
 
 !Mass of detector (in kg)
@@ -52,6 +54,7 @@ parameter (m_det = 10d-3)
 
 
 contains
+
     
 !----------
 !Gaussian resolution smoothing function
