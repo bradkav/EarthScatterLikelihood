@@ -133,9 +133,10 @@ subroutine read_hist(root, angle, vlist, flist)
     integer :: angle
     character(len=12) :: int_as_string
 
-    write(int_as_string,'(i0)') angle
+    write(int_as_string,'(i0)') angle-1
 
     fname = trim(data_dir) // trim(root) // '_histograms/speed.' // trim(int_as_string)
+    !write(*,*) fname
 
     nlines = count_lines(fname)
     

@@ -43,12 +43,12 @@ double precision :: lon_det, lat_det
 
 !Here we use the values for LNGS
 parameter (lon_det = 13.576d0)  
-parameter (lat_det = 45.454d0)
+parameter (lat_det = -45.454d0)
 !parameter (lat_det = -45.454d0)
 
 !Mass of detector (in kg)
 double precision :: m_det
-parameter (m_det = 100d-3)
+parameter (m_det = 10d-3)
 
 
 contains

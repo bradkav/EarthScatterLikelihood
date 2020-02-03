@@ -4,7 +4,7 @@ use stat
 
 implicit none
 
-integer :: i, j, nmx, i_E, i_t
+integer :: i, j, nmx, i_E, i_t, N_bench
 
 double precision :: mx_min, mx_max, x, tol, sigma, rho, par, N_exp, sig_min, sig_max, pval
 
@@ -21,6 +21,10 @@ read(input_str,*) data
 
 call getarg(2, input_str)
 read(input_str,*) G_only
+
+call getarg(3, input_str)
+read(input_str,*) m_x
+
 
 !Define time and energy bins
 day = (23+56.0/60.0 + 4.1/3600)/24.0
@@ -40,6 +44,13 @@ nmx = 20
 mx_min = 0.1001d0 !with mx_min=0.1 it does not work
 mx_max = 0.5d0
 
+!Number of benchmark values for sigma
+N_bench = 5
+!m_x     =  0.2d0
+sig_min = -36.d0
+sig_max = -30.d0
+
+
 !Number of points in the p-value matrix
 nrho = 500
 nsig = 500
@@ -51,7 +62,7 @@ allocate(sigma_j(nsig))
 write(*,*) "    Saving to files <stat_#.txt>..."
 
 write(data_str,*) data
-do i = 1, 30
+do i = 1, N_bench
 
    write(i_str,*) i
 
@@ -60,10 +71,12 @@ do i = 1, 30
    open (unit = 8, file = "output/stat_sigma_"//trim(adjustl(data_str))//"_"//trim(adjustl(i_str))//".txt")
    open (unit = 7, file = "output/stat_info_"//trim(adjustl(data_str))//"_"//trim(adjustl(i_str))//".txt")
 
-   m_x = 0.2d0
-
-   x=10.d0**(-36.d0 + 4d0*dble(i-1)/20.d0) 
-   call p_value(x)
+   !m_x = 0.2d0
+ 
+   !x=10.d0**(-36.d0 + 4d0*dble(i-1)/20.d0) 
+   x=10.d0**(sig_min + (sig_max-sig_min)*dble(i-1)/dble(N_bench-1)) 
+   
+   call p_value_profiled(x)
    
    do j = 1, nrho
       write(10,'(500E20.12)') p_val(j,1:nsig)
@@ -94,9 +107,7 @@ deallocate(sigma_j)
 stop
 50 continue
 
-m_x     =  0.2d0
-sig_min = -35.d0
-sig_max = -31.d0
+
 
 open(unit=11, file="G_1.txt")
 open(unit=22, file="G_2.txt")
