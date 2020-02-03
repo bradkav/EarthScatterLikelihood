@@ -56,7 +56,7 @@ rho_b = 0.4d0
 
 !Number of points in the p-value matrix
 nrho = 5000
-nsig = 500
+nsig = 1000
 allocate(p_val(nrho,nsig))
 allocate(rho_i(nrho))
 allocate(sigma_j(nsig))

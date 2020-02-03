@@ -297,7 +297,7 @@ end subroutine p_value
 
 subroutine p_value_profiled(x)
     
-  integer, parameter :: nmx = 20
+  integer, parameter :: nmx = 100
   double precision :: x,y,p,q
   double precision :: dzero
   double precision :: sigma_b, sigma, rho, sig_min, sig_max, rho_min, rho_max, mx_min, mx_max, mx_test
