@@ -50,7 +50,7 @@ double precision :: lat_det = 45.454d0
 
 !Mass of detector (in kg)
 double precision :: m_det
-parameter (m_det = 10d-3)
+parameter (m_det = 35d-3)
 
 
 contains

@@ -6,15 +6,14 @@ use expt, only: lat_det
 
 implicit none
 
-integer :: i, j, nmx, i_E, i_t, N_bench
+integer :: i, j, nmx, i_E, i_t, N_bench, FIX_MASS
 
 double precision :: mx_min, mx_max, x, tol, sigma_b, rho, par, N_exp, sig_min, sig_max, pval
 
 double precision :: dzero
-
 double precision :: day
 
-character(len=100) :: input_str, i_str, data_str, outpath, m_str, sig_str, ID_str
+character(len=100) :: input_str, i_str, data_str, outpath, m_str, sig_str, ID_str, prof_str
 
 
 call getarg(1, input_str)
@@ -31,9 +30,12 @@ call getarg(3, input_str)
 read(input_str,*) data
 
 call getarg(4, input_str)
-read(input_str,*) lat_det
+read(input_str,*) FIX_MASS
 
 call getarg(5, input_str)
+read(input_str,*) lat_det
+
+call getarg(6, input_str)
 read(input_str,*) outpath
 
 
@@ -58,6 +60,7 @@ rho_b = 0.4d0
 nrho = 5000
 nsig = 1000
 allocate(p_val(nrho,nsig))
+allocate(m_bf(nrho,nsig))
 allocate(rho_i(nrho))
 allocate(sigma_j(nsig))
 
@@ -77,7 +80,15 @@ write(sig_str, "(F6.2)") LOG10(sigma_b)
 
 !write(*,*) m_x, sigma_b
 
-write(ID_str,*) "m"//trim(adjustl(m_str))//"_lsig"//trim(adjustl(sig_str))//".txt"
+if (FIX_MASS.eq.1) then
+    write(*,*) "    Fixing DM mass..."    
+    prof_str = "_mfix"
+else
+    write(*,*) "    Profiling over DM mass..."
+    prof_str = "_mprof"
+end if
+
+write(ID_str,*) "m"//trim(adjustl(m_str))//"_lsig"//trim(adjustl(sig_str))//trim(adjustl(prof_str))//".txt"
 
 write(*,*) "    Saving to files <output/"//trim(adjustl(outpath))//"/stat_#.txt>..."
 write(*,*) "    File ID: "//trim(adjustl(ID_str))
@@ -86,6 +97,7 @@ write(*,*) "    File ID: "//trim(adjustl(ID_str))
 
 call system('mkdir -p output/' //trim(adjustl(outpath)))
 
+open (unit = 11, file = "output/"//trim(adjustl(outpath))//"/stat_mbf_"//trim(adjustl(ID_str)))
 open (unit = 10, file = "output/"//trim(adjustl(outpath))//"/stat_p_"//trim(adjustl(ID_str)))
 open (unit = 9, file = "output/"//trim(adjustl(outpath))//"/stat_rho_"//trim(adjustl(ID_str)))
 open (unit = 8, file = "output/"//trim(adjustl(outpath))//"/stat_sigma_"//trim(adjustl(ID_str)))
@@ -101,10 +113,19 @@ call initialise_modulation
 !x=10.d0**(sig_min + (sig_max-sig_min)*dble(i-1)/dble(N_bench-1)) 
 
 write(*,*) "    Calculating p-value grid"
-call p_value_profiled(1.0*sigma_b)
+
+if (FIX_MASS.eq.1) then
+   call p_value(1.0*sigma_b)
+else
+   call p_value_profiled(1.0*sigma_b)
+end if
 
 do j = 1, nrho
-  write(10,'(500E20.12)') p_val(j,1:nsig)
+  write(10,'(1000E12.4)') p_val(j,1:nsig)
+ 
+  if (FIX_MASS.ne.1) then
+    write(11,'(1000E12.4)') m_bf(j,1:nsig)
+  end if
 end do
 
 do j = 1, nrho
@@ -121,8 +142,9 @@ close(7)
 close(8)
 close(9)
 close(10)
+close(11)
 
-
+deallocate(m_bf)
 deallocate(p_val)
 deallocate(rho_i)
 deallocate(sigma_j)

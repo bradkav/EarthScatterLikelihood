@@ -121,7 +121,9 @@ function dRdE(E, t, A, m_x, sigma_SI)
 
     angle = calcIsoAngle(t, lon_det, lat_det)
 
-    int_factor = sigma_SI*calcSIFormFactor(E, A)*(A**2)
+    !For light DM, we set the form factor equal to 1
+    !For consistency with DAMASCUS
+    int_factor = sigma_SI*A**2 !*calcSIFormFactor(E, A)
     
     !
     dRdE = (interp_rho_scalar(m_x, sigma_SI, angle)/rho0)*rate_prefactor(m_x) &

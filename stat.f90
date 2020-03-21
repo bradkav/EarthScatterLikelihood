@@ -9,7 +9,7 @@ double precision :: df, pnonc
 
 double precision :: m_x, rho_b, sig_b, nu_tot
 
-double precision, dimension(:,:), allocatable :: p_val
+double precision, dimension(:,:), allocatable :: p_val, m_bf
 double precision, dimension(:), allocatable :: rho_i, sigma_j
 
 integer :: data,i_Eg,i_tg
@@ -54,6 +54,7 @@ subroutine p_value(x)
   double precision :: dzero
   double precision :: sigma_b, sigma, rho, sig_min, sig_max, rho_min, rho_max
   double precision :: sigma_old, N_binned(N_tbins,N_Ebins), N_exp_old(N_tbins,N_Ebins), N_exp, par, par2, lam_A
+  double precision, allocatable :: sig_list(:)
   double precision :: Lambda
   real :: start,finish
   integer :: i,j,l,m,i_t,i_E
@@ -61,13 +62,16 @@ subroutine p_value(x)
   !(rho,sigma) pair when the actual cross section and local density are x and rho_b = 0.4 GeV/cm^3,
   !respectively
 
+  allocate(sig_list(nsig))
+  !allocate(mx_list(nmx))
+
   sigma_b = x
   sig_b   = sigma_b
 
   if ( (sigma_b.ge.1.d-38) .and. (sigma_b.le.1.d-30) ) then
      sig_min = 0.1d0 * sigma_b
-     sig_max = 5d0 * sigma_b
-     rho_min = 0.1d0
+     sig_max = 10d0 * sigma_b
+     rho_min = 0.01d0
      rho_max = 1.d0
   else
      write(*,*) trim('sigma='),sigma_b,trim(' cm^2 is currently out of bounds')
@@ -77,6 +81,10 @@ subroutine p_value(x)
   sigma_old = 0.d0
   N_exp_old = 0.d0
   N_binned  = 0.d0
+
+  do i = 1, nsig
+      sig_list(i) = 10**(log10(sig_min) + (log10(sig_max)-log10(sig_min))*dble(i-1)/dble(nsig-1))
+  end do
 
   call cpu_time(start)
 
@@ -156,7 +164,8 @@ subroutine p_value(x)
   !p-value matrix
   do j = 1, nsig
 
-     sigma      = sig_min + (sig_max-sig_min)*dble(j-1)/dble(nsig-1)     
+     !sigma      = sig_min + (sig_max-sig_min)*dble(j-1)/dble(nsig-1)     
+     sigma = sig_list(j)
      sigma_j(j) = sigma
 
      do i = 1, nrho
@@ -287,6 +296,8 @@ subroutine p_value(x)
         
      end do
   end do
+ 
+  deallocate(sig_list)
   call cpu_time(finish)
   !write(*,*) finish-start
 
@@ -297,18 +308,22 @@ end subroutine p_value
 
 subroutine p_value_profiled(x)
     
-  integer, parameter :: nmx = 100
+  integer, parameter :: nmx = 200
   double precision :: x,y,p,q
   double precision :: dzero
   double precision :: sigma_b, sigma, rho, sig_min, sig_max, rho_min, rho_max, mx_min, mx_max, mx_test
   double precision :: sigma_old, N_binned(N_tbins,N_Ebins), N_exp_old(N_tbins,N_Ebins), N_exp, par, par2, lam_A
   double precision :: Lambda, maxLambda
   double precision, allocatable :: N_grid(:,:,:,:)
+  double precision, allocatable :: sig_list(:), mx_list(:)
   real :: start,finish
   integer :: i,j,l,m,i_t,i_E
   !For a dark matter particle mass m_x, it gives a matrix of p-values for rejecting a hypothetized 
   !(rho,sigma) pair when the actual cross section and local density are x and rho_b = 0.4 GeV/cm^3,
   !respectively
+
+  allocate(sig_list(nsig))
+  allocate(mx_list(nmx))
 
   allocate(N_grid(N_tbins, N_Ebins, nmx, nsig))
 
@@ -336,7 +351,16 @@ subroutine p_value_profiled(x)
      write(*,*) trim('sigma='),sigma_b,trim(' cm^2 is currently out of bounds')
      stop
   end if
+
+  do i = 1, nsig
+      sig_list(i) = 10**(log10(sig_min) + (log10(sig_max)-log10(sig_min))*dble(i-1)/dble(nsig-1))
+  end do
      
+  do i = 1, nmx
+      mx_list(i) = 10**(log10(mx_min) + (log10(mx_max)-log10(mx_min))*dble(i-1)/dble(nmx-1))
+  end do
+  !write(*,*) sig_list
+
   sigma_old = 0.d0
   N_exp_old = 0.d0
   N_binned  = 0.d0
@@ -422,10 +446,12 @@ subroutine p_value_profiled(x)
 
   !Grid of expected event numbers:
   do j = 1, nsig
-     sigma      = sig_min + (sig_max-sig_min)*dble(j-1)/dble(nsig-1)     
+     !sigma      = sig_min + (sig_max-sig_min)*dble(j-1)/dble(nsig-1)     
+     sigma = sig_list(j)
      !write(*,*) j
      do l = 1, nmx
-         mx_test = mx_min + (mx_max-mx_min)*dble(l-1)/dble(nmx-1) 
+         mx_test = mx_list(l)
+         !mx_test = mx_min + (mx_max-mx_min)*dble(l-1)/dble(nmx-1) 
              
              do i_t = 1, N_tbins
                 do i_E = 1, N_Ebins
@@ -454,7 +480,8 @@ subroutine p_value_profiled(x)
   !p-value matrix
   do j = 1, nsig
 
-     sigma      = sig_min + (sig_max-sig_min)*dble(j-1)/dble(nsig-1)     
+     !sigma      = sig_min + (sig_max-sig_min)*dble(j-1)/dble(nsig-1)     
+     sigma = sig_list(j)
      sigma_j(j) = sigma
 
      do i = 1, nrho
@@ -465,7 +492,8 @@ subroutine p_value_profiled(x)
         lam_A = -1d30
         do l = 1, nmx
             
-            mx_test = mx_min + (mx_max-mx_min)*dble(l-1)/dble(nmx-1) 
+            mx_test = mx_list(l)
+            !mx_test = mx_min + (mx_max-mx_min)*dble(l-1)/dble(nmx-1) 
 
             !Noncentrality parameter generalising Eq. (20) in Cowan et al., Eur. Phys. J. C (2011) 71: 1554
             if (data.eq.1) then !Energy + time
@@ -562,6 +590,7 @@ subroutine p_value_profiled(x)
             !sigma_old = sigma
 
             if (par.gt.lam_A) then
+                m_bf(i,j) = mx_test
                 lam_A = par
             end if 
             !write(*,*) mx_test, sigma, rho, par, lam_A
@@ -569,7 +598,7 @@ subroutine p_value_profiled(x)
             !lam_A  = par !This is indeed delta log L
 
         end do !End of the loop over mx
-
+        !write(*,*) " "
         Lambda = -2.d0 * lam_A
 
         !write(*,*) " "
@@ -596,6 +625,9 @@ subroutine p_value_profiled(x)
         
      end do
   end do
+
+  deallocate(mx_list)
+  deallocate(sig_list)
   deallocate(N_grid)
 
   call cpu_time(finish)
