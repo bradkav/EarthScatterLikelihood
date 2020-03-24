@@ -59,6 +59,7 @@ rho_b = 0.4d0
 !Number of points in the p-value matrix
 nrho = 5000
 nsig = 1000
+allocate(p_val_rho(nrho))
 allocate(p_val(nrho,nsig))
 allocate(m_bf(nrho,nsig))
 allocate(rho_i(nrho))
@@ -97,11 +98,14 @@ write(*,*) "    File ID: "//trim(adjustl(ID_str))
 
 call system('mkdir -p output/' //trim(adjustl(outpath)))
 
+open (unit = 12, file = "output/"//trim(adjustl(outpath))//"/stat_prho_"//trim(adjustl(ID_str)))
 open (unit = 11, file = "output/"//trim(adjustl(outpath))//"/stat_mbf_"//trim(adjustl(ID_str)))
 open (unit = 10, file = "output/"//trim(adjustl(outpath))//"/stat_p_"//trim(adjustl(ID_str)))
 open (unit = 9, file = "output/"//trim(adjustl(outpath))//"/stat_rho_"//trim(adjustl(ID_str)))
 open (unit = 8, file = "output/"//trim(adjustl(outpath))//"/stat_sigma_"//trim(adjustl(ID_str)))
 open (unit = 7, file = "output/"//trim(adjustl(outpath))//"/stat_info_"//trim(adjustl(ID_str)))
+
+
 
 write(*,*) " "
 !Read in the data tables for the daily modulations
@@ -130,6 +134,7 @@ end do
 
 do j = 1, nrho
   write(9,*) rho_i(j)
+  write(12,*) p_val_rho(j)
 end do
 
 do j = 1, nsig
@@ -143,12 +148,13 @@ close(8)
 close(9)
 close(10)
 close(11)
+close(12)
 
 deallocate(m_bf)
 deallocate(p_val)
 deallocate(rho_i)
 deallocate(sigma_j)
-
+deallocate(p_val_rho)
 
 end program calcContour
 
