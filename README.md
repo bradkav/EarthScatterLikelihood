@@ -1,6 +1,6 @@
 ## Likelihood calculator for Earth-scattering DM
 
-**Last Update:** 09/12/2019
+**Last Update:** 24/03/2020 - documentation to be updated shortly...
 
 #### Summary
 
