@@ -1,5 +1,7 @@
 ## Likelihood calculator for Earth-scattering DM
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3725882.svg)](https://doi.org/10.5281/zenodo.3725882)
+
 **Last Update:** 24/03/2020 - documentation to be updated shortly...
 
 #### Summary
