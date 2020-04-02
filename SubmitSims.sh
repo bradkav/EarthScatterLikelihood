@@ -19,4 +19,5 @@ module unload GCCcore
 module load Python/2.7.12-intel-2016b
 module load slurm-tools
 
-time mpirun -np 16 python2.7 RunMPI_Contours.py -m_x 0.200 -data 3 -out_dir Ultimo3
+#time mpirun -np 16 python2.7 RunMPI_Contours.py -m_x 0.200 -data 1 -out_dir Final1
+time mpirun -np 16 python2.7 RunMPI_Contours.py -m_x 0.200 -data 3 -out_dir Final3
