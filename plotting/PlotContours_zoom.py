@@ -37,8 +37,8 @@ mpl.rcParams['legend.edgecolor'] = 'inherit'
 #---------------
 
 parser = argparse.ArgumentParser(description='...')
-parser.add_argument('-runID', '--runID', help='Text ID for the results to be plotted', default="Final")
-parser.add_argument('-m_x', '--m_x', help='DM mass in GeV', default = 0.2)
+parser.add_argument('-runID', '--runID', help='Text ID for the results to be plotted', type=str, default="Final")
+parser.add_argument('-m_x', '--m_x', help='DM mass in GeV', type = float, default = 0.2)
 parser.add_argument('-hemisphere','--hemisphere', help='Hemisphere of the experiment (N or S)', type=str, default="N")
 args = parser.parse_args()
 

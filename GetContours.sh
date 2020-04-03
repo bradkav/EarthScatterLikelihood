@@ -1,1 +1,1 @@
-./testStat 1 False $1
+./calcContour 0.2 1e-32 1 0 -37 test
