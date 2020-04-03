@@ -2,9 +2,13 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3725882.svg)](https://doi.org/10.5281/zenodo.3725882) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Last Update:** 24/03/2020 - documentation to be updated shortly...
+**Last Update:** 02/04/2020
+
+In order to reproduce the results of the paper "*Measuring the local Dark Matter density in the laboratory*" (arXiv:2004.XXXXX), you will also need the tabulated p-values, which were generated with this code: [DOI:10.5281/zenodo.3739341](https://doi.org/10.5281/zenodo.3739341). Simply extract those data files into the [results/](results/) folder.
 
 #### Summary
+
+Code for calculating event rates and likelihoods for Earth-scattering DM, released in association with arXiv:2004.XXXXX. 
 
 The likelihood calculator and event generator currently work in the ranges:
 
@@ -17,7 +21,6 @@ Everything is written in fortran. It should conform to the fortran95 standard an
 
 Experimental parameters are currently hard-coded in the module `expt.f90`. If you want to change the resolution, mass, exposure, latitude, background rate etc., just edit the appropriate parameter in `expt.f90`. In future, we can do something more sophisticated and read the parameters from file.
 
-The event generator should be fast - it shouldn't take more than about 10-20 seconds no matter how many events you need to generate. The likelihood calculators should also be reasonably fast. For the full likelihood, you should be able to do about 100 evaluations/second with O(1000) events. If you're evaluating the binned Asimov likelihood, it's a little slower - perhaps 50 evaluations/per second (for 12 time bins and 12 energy bins).
 
 **NB: Requires results of the DaMaSCUS simulations.** The location of the DaMaSCUS simulation results can be specified as `data_dir` in the file `modulation.f90`.
 
@@ -67,8 +70,17 @@ Note that you should always call the `initialise_modulation` subroutine (from `m
 
 To run the parameter reconstructions, run 
 ```
-./testStat 1 False
+./calcContour M_X SIGMA_B DATA FIX_MASS LAT_DET OUTPATH
 ```
+
+The command line arguments are as follows:
+* `M_X` - WIMP mass in GeV  
+* `SIGMA_B` - Benchmark WIMP-proton cross section in cm^2  
+* `DATA` - flag for which data to use (1 = Energy + time, 2 = time only, 3 = energy only)  
+* `FIX_MASS` - flag for whether the WIMP mass should be kept fixed (1 = fix to benchmark value, 0 = profile in range [0.1, 0.5] GeV)  
+* `LAT_DET` - detector latitude (in degrees, over the range [-90, 90])  
+* `OUTPATH` - output folder to save results to (this will be `./output/OUTPATH/`)
+
 
 #### List of files:
 
@@ -95,8 +107,4 @@ The event rate calculations include a fixed flat background rate (`BG_rate` in `
 
 #### To-Do
 
-* Add header information to events.txt files
-* Improve bounds-checking in `interp_eta_scalar` (in `modulation.f90`)
-* Write a set of standard tests and make sure that the codes agree between here and dropbox...
-* Update the `Nevents` calculation so that `E_max` is larger and intrinsic (i.e. doesn't need to be fed to the code...)
 * Extend to lower values of m_x by using scaling relations

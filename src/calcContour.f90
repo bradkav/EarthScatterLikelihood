@@ -91,19 +91,19 @@ end if
 
 write(ID_str,*) "m"//trim(adjustl(m_str))//"_lsig"//trim(adjustl(sig_str))//trim(adjustl(prof_str))//".txt"
 
-write(*,*) "    Saving to files <output/"//trim(adjustl(outpath))//"/stat_#.txt>..."
+write(*,*) "    Saving to files <results/"//trim(adjustl(outpath))//"/stat_#.txt>..."
 write(*,*) "    File ID: "//trim(adjustl(ID_str))
 
 
 
-call system('mkdir -p output/' //trim(adjustl(outpath)))
+call system('mkdir -p results/' //trim(adjustl(outpath)))
 
-open (unit = 12, file = "output/"//trim(adjustl(outpath))//"/stat_prho_"//trim(adjustl(ID_str)))
-open (unit = 11, file = "output/"//trim(adjustl(outpath))//"/stat_mbf_"//trim(adjustl(ID_str)))
-open (unit = 10, file = "output/"//trim(adjustl(outpath))//"/stat_p_"//trim(adjustl(ID_str)))
-open (unit = 9, file = "output/"//trim(adjustl(outpath))//"/stat_rho_"//trim(adjustl(ID_str)))
-open (unit = 8, file = "output/"//trim(adjustl(outpath))//"/stat_sigma_"//trim(adjustl(ID_str)))
-open (unit = 7, file = "output/"//trim(adjustl(outpath))//"/stat_info_"//trim(adjustl(ID_str)))
+open (unit = 12, file = "results/"//trim(adjustl(outpath))//"/stat_prho_"//trim(adjustl(ID_str)))
+open (unit = 11, file = "results/"//trim(adjustl(outpath))//"/stat_mbf_"//trim(adjustl(ID_str)))
+open (unit = 10, file = "results/"//trim(adjustl(outpath))//"/stat_p_"//trim(adjustl(ID_str)))
+open (unit = 9, file = "results/"//trim(adjustl(outpath))//"/stat_rho_"//trim(adjustl(ID_str)))
+open (unit = 8, file = "results/"//trim(adjustl(outpath))//"/stat_sigma_"//trim(adjustl(ID_str)))
+open (unit = 7, file = "results/"//trim(adjustl(outpath))//"/stat_info_"//trim(adjustl(ID_str)))
 
 
 
