@@ -1,10 +1,10 @@
 ## EarthScatterLikelihood
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3725882.svg)](https://doi.org/10.5281/zenodo.3725882) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3725882.svg)](https://doi.org/10.5281/zenodo.3725882) [![arXiv](https://img.shields.io/badge/arXiv-2004.01621-B31B1B)](https://arxiv.org/abs/2004.01621) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **Last Update:** 03/04/2020
 
-Code for calculating event rates and likelihoods for Earth-scattering DM, released in association with the paper "*Measuring the local Dark Matter density in the laboratory*" (arXiv:2004.XXXXX). The code is written in Fortran (for some reason), with plotting routines in Python.
+Code for calculating event rates and likelihoods for Earth-scattering DM, released in association with the paper "*Measuring the local Dark Matter density in the laboratory*" ([arXiv:2004.01621](https://arxiv.org/abs/2004.01621)). The code is written in Fortran (for some reason), with plotting routines in Python.
 
 The folder [`DaMaSCUS_results/`](DaMaSCUS_results/) contains results from Monte Carlo simulations, which are read in by the code. These were generated using [`DaMaSCUS`](https://github.com/temken/DaMaSCUS/tree/v1.1).
 
