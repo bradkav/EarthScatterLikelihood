@@ -13,7 +13,7 @@ The command line arguments are as follows:
 * `M_X` - WIMP mass in GeV  
 * `SIGMA_B` - Benchmark WIMP-proton cross section in cm^2  
 * `DATA` - flag for which data to use (1 = Energy + time, 2 = time only, 3 = energy only)  
-* `FIX_MASS` - flag for whether the WIMP mass should be kept fixed (1 = fix to benchmark value, 0 = profile in range [0.1, 0.5] GeV)  
+* `FIX_MASS` - flag for whether the WIMP mass should be kept fixed (1 = fix to benchmark value, 0 = profile in range [0.058, 0.5] GeV)  
 * `LAT_DET` - detector latitude (in degrees, over the range [-90, 90])  
 * `OUTPATH` - output folder to save results to (this will be `./results/OUTPATH/`)
 
