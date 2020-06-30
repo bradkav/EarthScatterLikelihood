@@ -71,7 +71,7 @@ subroutine initialise_modulation
             !Then read the other results from file
             do i_sig = 2, Nsigma
                 write(sigstr, '(i0)') int(LOG10(sigma_vals(i_sig)))
-                write(mstr, '(i0)') nint(1000*mass_vals(i_m))
+                write(mstr, '(i3.3)') nint(1000*mass_vals(i_m))
                 simID = 'mDM_' // mstr // '_sig_1e' // sigstr
                 !write(*,*) simID  
                 call read_density(simID, angle_list, rho_list(i_m,i_sig,:))
@@ -91,7 +91,7 @@ subroutine initialise_modulation
                 ! Initialise the rest from file
                 do i_sig = 2, Nsigma
                     write(sigstr, '(i0)') int(LOG10(sigma_vals(i_sig)))
-                    write(mstr, '(i0)') nint(1000*mass_vals(i_m))
+                    write(mstr, '(i3.3)') nint(1000*mass_vals(i_m))
                     simID = 'mDM_' // mstr // '_sig_1e' // sigstr
                     call calc_eta(simID, i_ang, eta_grid(i_m,i_sig,i_ang,:))
                 end do
