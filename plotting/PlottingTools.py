@@ -12,7 +12,7 @@ import os
 rootdir = "../results/"
 
 def plotContour_single(m_x, sigma, outpath, col='C0', ls='solid', overlay_mass=False, add_fixed_mass=False, fill_contour=True):
-  
+    #print(np.geomspace(0.05, 0.5, 9))
     ID_str = "m%d_lsig%6.2f_mprof.txt"%(1000*m_x, np.log10(sigma))
     
     if not (os.path.isfile(rootdir + outpath + "/stat_sigma_" + ID_str)):
@@ -24,17 +24,21 @@ def plotContour_single(m_x, sigma, outpath, col='C0', ls='solid', overlay_mass=F
 
     #print(np.min(p_grid))
     sig_grid, rho_grid = np.meshgrid(sig_list, rho_list)
-    
+
+    #print(0.4 - np.min(rho_grid[p_grid > 0.05]), np.max(rho_grid[p_grid > 0.05]) - 0.4)
+    #print(sigma - np.min(sig_grid[p_grid > 0.05]), np.max(sig_grid[p_grid > 0.05]) - sigma)    
     #print(p_grid.shape)
     
     if (overlay_mass):
         m_grid = np.loadtxt(rootdir + outpath + "/stat_mbf_" + ID_str)
-        plt.contourf(sig_grid, rho_grid, m_grid, alpha=0.5, levels=np.linspace(1e-1, 5e-1, 17),
-                cmap=plt.get_cmap('seismic'), norm=colors.DivergingNorm(vmin=0.1, vcenter=0.2, vmax=0.5))
+        plt.contourf(sig_grid, rho_grid, np.log10(m_grid), alpha=0.5, levels=np.log10(np.geomspace(0.5e-1, 5e-1, 17)),
+                #ticks=np.arange(50, 549, 25),
+                cmap=plt.get_cmap('seismic'), norm=colors.DivergingNorm(vmin=np.log10(0.05), vcenter=np.log10(0.1), vmax=np.log10(0.5)))
                  #norm=colors.LogNorm(vmin=0.1, vmax=0.5))
-        cb = plt.colorbar(label=r'$\hat{m}_\chi$ [GeV]')
-        #cb.set_ticks(np.linspace(0.1, 0.5, 9))
-        cb.set_ticklabels(["0.1","", "0.2","", "0.3","", "0.4","", "0.5"])
+        cb = plt.colorbar(label=r'$\hat{m}_\chi$ [MeV]')
+        #cb.set_ticks(np.log10(np.arange(50, 549, 25)))        
+        #cb.set_ticklabels(["0.1","", "0.2","", "0.3","", "0.4","", "0.5"])
+        cb.set_ticklabels(["50","", "90","", "160","", "280","", "500"])
         
         
     if (add_fixed_mass):
@@ -51,8 +55,36 @@ def plotContour_single(m_x, sigma, outpath, col='C0', ls='solid', overlay_mass=F
     if (fill_contour):
         plt.contourf(sig_grid, rho_grid, p_grid, levels = (0.05,1), colors=col, alpha=0.5)
 
-def plotContour_nomodulation(m_x, sigma, outpath, col='C0', ls='dashed'):
-    ID_str = "m%d_lsig%6.2f_mprof.txt"%(1000*m_x, np.log10(sigma))
+
+def plotContour_modulation(m_x, sigma, outpath, col='C0', ls='solid', fixed_mass=False):
+    #print(np.geomspace(0.05, 0.5, 9))
+    if (fixed_mass):
+        ID_str = "m%d_lsig%6.2f_mfix.txt"%(1000*m_x, np.log10(sigma))
+    else:
+        ID_str = "m%d_lsig%6.2f_mprof.txt"%(1000*m_x, np.log10(sigma))
+    
+    if not (os.path.isfile(rootdir + outpath + "/stat_sigma_" + ID_str)):
+        ID_str = "m%d_lsig%6.2f.txt"%(1000*m_x, np.log10(sigma))
+    
+    sig_list = np.loadtxt(rootdir + outpath + "/stat_sigma_" + ID_str)
+    rho_list = np.loadtxt(rootdir + outpath + "/stat_rho_" + ID_str)
+    p_grid = np.loadtxt(rootdir + outpath + "/stat_p_" + ID_str)
+
+    #print(np.min(p_grid))
+    sig_grid, rho_grid = np.meshgrid(sig_list, rho_list)
+
+    #print(0.4 - np.min(rho_grid[p_grid > 0.05]), np.max(rho_grid[p_grid > 0.05]) - 0.4)
+    #print(sigma - np.min(sig_grid[p_grid > 0.05]), np.max(sig_grid[p_grid > 0.05]) - sigma)    
+    #print(p_grid.shape)
+        
+    plt.contour(sig_grid, rho_grid, p_grid, levels = (0.05,), colors=col, linewidths=1.5, linestyles=ls)
+    plt.contourf(sig_grid, rho_grid, p_grid, levels = (0.05,1), colors=col, alpha=0.5)
+
+def plotContour_nomodulation(m_x, sigma, outpath, col='C0', ls='dashed', fixed_mass = False):
+    if (fixed_mass):
+        ID_str = "m%d_lsig%6.2f_mfix.txt"%(1000*m_x, np.log10(sigma))
+    else:
+        ID_str = "m%d_lsig%6.2f_mprof.txt"%(1000*m_x, np.log10(sigma))
     
     if not (os.path.isfile(rootdir + outpath + "/stat_sigma_" + ID_str)):
         ID_str = "m%d_lsig%6.2f.txt"%(1000*m_x, np.log10(sigma))

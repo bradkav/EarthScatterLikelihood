@@ -9,7 +9,7 @@ module stat
 
   double precision :: m_x, rho_b, sig_b, nu_tot
 
-  double precision, dimension(:,:), allocatable :: p_val, m_bf
+  double precision, dimension(:,:), allocatable :: p_val, m_bf, likes_grid, N_events_tot
   double precision, dimension(:), allocatable :: rho_i, sigma_j, p_val_rho
 
   integer :: data,i_Eg,i_tg
@@ -54,6 +54,7 @@ contains
     double precision :: dzero
     double precision :: sigma_b, sigma, rho, sig_min, sig_max, rho_min, rho_max
     double precision :: sigma_old, N_binned(N_tbins,N_Ebins), N_exp_old(N_tbins,N_Ebins), N_exp, par, par2, lam_A, lam_1D
+    double precision :: N_BG(N_Ebins)
     double precision, allocatable :: sig_list(:)
     double precision, allocatable :: N_grid(:,:,:)
     double precision :: Lambda
@@ -88,6 +89,12 @@ contains
        sig_list(i) = 10**(log10(sig_min) + (log10(sig_max)-log10(sig_min))*dble(i-1)/dble(nsig-1))
     end do
 
+    !Calculate background in each bin
+    do i_E = 1, N_Ebins
+       N_BG(i_E) = BG_R0*BG_E0*(exp(-E_edges(i_E)/BG_E0) - exp(-E_edges(i_E+1)/BG_E0))
+       N_BG(i_E) = N_BG(i_E) + BG_flat*(E_edges(i_E + 1) - E_edges(i_E))
+    end do
+   
     call cpu_time(start)
 
     !Asimov data
@@ -101,8 +108,7 @@ contains
              N_binned(i_t, i_E) = (rho_b/rho0)*m_det*t_exp*Nevents_short(E_edges(i_E), E_edges(i_E+1), &
                   t_edges(i_t), t_edges(i_t+1), A_det, m_x, sigma_b)
 
-             N_binned(i_t, i_E) = N_binned(i_t, i_E) + BG_rate*(t_edges(i_t+1) - t_edges(i_t))* &
-                  (E_edges(i_E+1) - E_edges(i_E))*t_exp*m_det
+             N_binned(i_t, i_E) = N_binned(i_t, i_E) + N_BG(i_E)*(t_edges(i_t+1) - t_edges(i_t))*t_exp*m_det
 
              if (N_binned(i_t, i_E) < 0) then
                 N_binned(i_t, i_E) = 0.d0
@@ -123,8 +129,7 @@ contains
              par = (rho_b/rho0)*m_det*t_exp*Nevents_short(E_edges(i_E), E_edges(i_E+1), &
                   t_edges(i_t), t_edges(i_t+1), A_det, m_x, sigma_b)
 
-             par = par + BG_rate*(t_edges(i_t+1) - t_edges(i_t))* &
-                  (E_edges(i_E+1) - E_edges(i_E))*t_exp*m_det
+             par = par + N_BG(i_E)*(t_edges(i_t+1) - t_edges(i_t))*t_exp*m_det
 
              N_binned(i_t, 1) = N_binned(i_t, 1) + par        
           end do
@@ -147,8 +152,7 @@ contains
              par = (rho_b/rho0)*m_det*t_exp*Nevents_short(E_edges(i_E), E_edges(i_E+1), &
                   t_edges(i_t), t_edges(i_t+1), A_det, m_x, sigma_b)
 
-             par = par + BG_rate*(t_edges(i_t+1) - t_edges(i_t))* &
-                  (E_edges(i_E+1) - E_edges(i_E))*t_exp*m_det
+             par = par + N_BG(i_E)*(t_edges(i_t+1) - t_edges(i_t))*t_exp*m_det
 
              N_binned(1, i_E) = N_binned(1, i_E) + par
           end do
@@ -216,8 +220,7 @@ contains
                       !N_exp_old(i_t, i_E) = (rho0/rho)*N_exp
                       !end if
 
-                      N_exp = N_exp + BG_rate*(t_edges(i_t+1) - t_edges(i_t))* &
-                           (E_edges(i_E+1) - E_edges(i_E))*t_exp*m_det
+                      N_exp = N_exp + N_BG(i_E)*(t_edges(i_t+1) - t_edges(i_t))*t_exp*m_det
 
                       if (N_exp < 0) then
                          N_exp = 0d0
@@ -244,8 +247,7 @@ contains
                       !N_exp_old(i_t, i_E) = (rho0/rho)*par2
                       !end if
 
-                      par2 = par2 + BG_rate*(t_edges(i_t+1) - t_edges(i_t))* &
-                           (E_edges(i_E+1) - E_edges(i_E))*t_exp*m_det
+                      par2 = par2 + N_BG(i_E)*(t_edges(i_t+1) - t_edges(i_t))*t_exp*m_det
 
                       N_exp = N_exp + par2
 
@@ -276,8 +278,7 @@ contains
                       !N_exp_old(i_t, i_E) = (rho0/rho)*par2
                       !end if
 
-                      par2 = par2 + BG_rate*(t_edges(i_t+1) - t_edges(i_t))* &
-                           (E_edges(i_E+1) - E_edges(i_E))*t_exp*m_det
+                      par2 = par2 + N_BG(i_E)*(t_edges(i_t+1) - t_edges(i_t))*t_exp*m_det
 
                       N_exp = N_exp + par2
 
@@ -295,6 +296,8 @@ contains
 
           lam_A  = par
 
+          likes_grid(i,j) = lam_A
+          
           Lambda = -2.d0 * lam_A
 
           pnonc = Lambda
@@ -353,14 +356,17 @@ contains
 
   subroutine p_value_profiled(x)
 
-    integer, parameter :: nmx = 250
+    !This should be nmx = 250 for the full calculations
+    integer, parameter :: nmx = 1000
     double precision :: x,y,p,q
     double precision :: dzero
-    double precision :: sigma_b, sigma, rho, sig_min, sig_max, rho_min, rho_max, mx_min, mx_max, mx_test
+    double precision :: sigma_b, sigma, rho, sig_min, sig_max, rho_min, rho_max, mx_min, mx_max, mx_test, N_tot
     double precision :: sigma_old, N_binned(N_tbins,N_Ebins), N_exp_old(N_tbins,N_Ebins), N_exp, par, par2, lam_A, lam_1D
     double precision :: Lambda, maxLambda
+    double precision :: N_BG(N_Ebins)
     double precision, allocatable :: N_grid(:,:,:,:)
     double precision, allocatable :: sig_list(:), mx_list(:)
+    double precision, allocatable :: mx_grid(:,:)
     real :: start,finish
     integer :: i,j,l,m,i_t,i_E
     !For a dark matter particle mass m_x, it gives a matrix of p-values for rejecting a hypothetized 
@@ -380,7 +386,7 @@ contains
     sig_b   = sigma_b
 
 
-    mx_min = 0.101d0 !with mx_min=0.1 it does not work
+    mx_min = 0.0581d0 !with mx_min=0.1 it does not work
     !write(*,*) "Reset mass limits"
     mx_max = 0.5d0
 
@@ -401,11 +407,22 @@ contains
        sig_list(i) = 10**(log10(sig_min) + (log10(sig_max)-log10(sig_min))*dble(i-1)/dble(nsig-1))
     end do
 
+    !DEFINE M_X GRID HERE!!!
+    
     do i = 1, nmx
        mx_list(i) = 10**(log10(mx_min) + (log10(mx_max)-log10(mx_min))*dble(i-1)/dble(nmx-1))
     end do
+
+    
     !write(*,*) sig_list
 
+    !Calculate background in each bin
+    do i_E = 1, N_Ebins
+       N_BG(i_E) = BG_R0*BG_E0*(exp(-E_edges(i_E)/BG_E0) - exp(-E_edges(i_E+1)/BG_E0))
+       N_BG(i_E) = N_BG(i_E) + BG_flat*(E_edges(i_E + 1) - E_edges(i_E))
+    end do
+    
+    
     sigma_old = 0.d0
     N_exp_old = 0.d0
     N_binned  = 0.d0
@@ -421,16 +438,16 @@ contains
        par    = 0.d0
        do i_t = 1, N_tbins
           do i_E = 1, N_Ebins
-
+             !write(*,*) rho_b/rho0, sigma_b
              N_binned(i_t, i_E) = (rho_b/rho0)*m_det*t_exp*Nevents_short(E_edges(i_E), E_edges(i_E+1), &
                   t_edges(i_t), t_edges(i_t+1), A_det, m_x, sigma_b)
 
-             N_binned(i_t, i_E) = N_binned(i_t, i_E) + BG_rate*(t_edges(i_t+1) - t_edges(i_t))* &
-                  (E_edges(i_E+1) - E_edges(i_E))*t_exp*m_det
-
              if (N_binned(i_t, i_E) < 0) then
-                N_binned(i_t, i_E) = 0.d0
+                N_binned(i_t, i_E) = 1.0d-30
              end if
+             
+             N_binned(i_t, i_E) = N_binned(i_t, i_E) + N_BG(i_E)*(t_edges(i_t+1) - t_edges(i_t))*t_exp*m_det
+
 
              nu_tot = nu_tot + N_binned(i_t, i_E)
 
@@ -447,8 +464,7 @@ contains
              par = (rho_b/rho0)*m_det*t_exp*Nevents_short(E_edges(i_E), E_edges(i_E+1), &
                   t_edges(i_t), t_edges(i_t+1), A_det, m_x, sigma_b)
 
-             par = par + BG_rate*(t_edges(i_t+1) - t_edges(i_t))* &
-                  (E_edges(i_E+1) - E_edges(i_E))*t_exp*m_det
+             par = par + N_BG(i_E)*(t_edges(i_t+1) - t_edges(i_t))*t_exp*m_det
 
              N_binned(i_t, 1) = N_binned(i_t, 1) + par        
           end do
@@ -471,8 +487,7 @@ contains
              par = (rho_b/rho0)*m_det*t_exp*Nevents_short(E_edges(i_E), E_edges(i_E+1), &
                   t_edges(i_t), t_edges(i_t+1), A_det, m_x, sigma_b)
 
-             par = par + BG_rate*(t_edges(i_t+1) - t_edges(i_t))* &
-                  (E_edges(i_E+1) - E_edges(i_E))*t_exp*m_det
+             par = par + N_BG(i_E)*(t_edges(i_t+1) - t_edges(i_t))*t_exp*m_det
 
              N_binned(1, i_E) = N_binned(1, i_E) + par
           end do
@@ -489,6 +504,10 @@ contains
 
     write(*,*) "    Total number of signal events:", nu_tot
 
+    !BJK: Use a "REFINE" variable to GOTO here, and use a different set of
+    !mass values...
+
+    
     !Grid of expected event numbers:
     do j = 1, nsig
        !sigma      = sig_min + (sig_max-sig_min)*dble(j-1)/dble(nsig-1)     
@@ -535,6 +554,7 @@ contains
           sigma_j(j) = sigma
 
           lam_A = -1d30
+          N_tot = 0d0
           do l = 1, nmx
 
              mx_test = mx_list(l)
@@ -557,13 +577,14 @@ contains
                       !N_exp_old(i_t, i_E) = (rho0/rho)*N_exp
                       !end if
 
-                      N_exp = N_exp + BG_rate*(t_edges(i_t+1) - t_edges(i_t))* &
-                           (E_edges(i_E+1) - E_edges(i_E))*t_exp*m_det
-
                       if (N_exp < 0) then
-                         N_exp = 0d0
+                         N_exp = 1.0d-30
                       end if
+                      
+                      N_exp = N_exp + N_BG(i_E)*(t_edges(i_t+1) - t_edges(i_t))*t_exp*m_det
 
+                      N_tot = N_tot + N_exp
+                      
                       par = par + N_binned(i_t, i_E) - N_exp + N_binned(i_t, i_E)*log(N_exp/N_binned(i_t, i_E))
 
                    end do
@@ -585,8 +606,7 @@ contains
                       !N_exp_old(i_t, i_E) = (rho0/rho)*par2
                       !end if
 
-                      par2 = par2 + BG_rate*(t_edges(i_t+1) - t_edges(i_t))* &
-                           (E_edges(i_E+1) - E_edges(i_E))*t_exp*m_det
+                      par2 = par2 + N_BG(i_E)*(t_edges(i_t+1) - t_edges(i_t))*t_exp*m_det
 
                       N_exp = N_exp + par2
 
@@ -595,7 +615,9 @@ contains
                    if (N_exp < 0) then
                       N_exp = 0d0
                    end if
-
+                   
+                   N_tot = N_tot + N_exp
+                   
                    par = par + N_binned(i_t, 1) - N_exp + N_binned(i_t, 1)*log(N_exp/N_binned(i_t, 1))
 
                 end do
@@ -616,8 +638,7 @@ contains
                       !N_exp_old(i_t, i_E) = (rho0/rho)*par2
                       !end if
 
-                      par2 = par2 + BG_rate*(t_edges(i_t+1) - t_edges(i_t))* &
-                           (E_edges(i_E+1) - E_edges(i_E))*t_exp*m_det
+                      par2 = par2 + N_BG(i_E)*(t_edges(i_t+1) - t_edges(i_t))*t_exp*m_det
 
                       N_exp = N_exp + par2
 
@@ -627,6 +648,8 @@ contains
                       N_exp = 0d0
                    end if
 
+                   N_tot = N_tot + N_exp
+                   
                    par = par + N_binned(1, i_E) - N_exp + N_binned(1, i_E)*log(N_exp/N_binned(1, i_E)) 
 
                 end do
@@ -637,6 +660,7 @@ contains
 
              if (par.gt.lam_A) then
                 m_bf(i,j) = mx_test
+                N_events_tot(i,j) = N_tot
                 lam_A = par
              end if
              !write(*,*) mx_test, sigma, rho, par, lam_A
@@ -645,6 +669,9 @@ contains
 
           end do !End of the loop over mx
           !write(*,*) " "
+
+          likes_grid(i, j) = lam_A
+          
           Lambda = -2.d0 * lam_A
 
           !write(*,*) " "
@@ -693,6 +720,7 @@ contains
     end do
 
     deallocate(mx_list)
+    deallocate(mx_grid)
     deallocate(sig_list)
     deallocate(N_grid)
 

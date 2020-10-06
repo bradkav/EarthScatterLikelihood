@@ -1,4 +1,4 @@
-B1;95;0c#!/usr/bin/env python
+#!/usr/bin/env python
 from mpi4py import MPI
 from subprocess import call
 import numpy as np
@@ -17,12 +17,13 @@ rank = comm.Get_rank()
 
 #Parse the arguments!
 parser = argparse.ArgumentParser(description='...')
-parser.add_argument('-m_x','--m_x', help='DM mass in GeV', type=float,default = 0.2)
+parser.add_argument('-m_x','--m_x', help='DM mass in GeV', type=float,default = 0.1)
 #parser.add_argument('-sigma_p','--sigma_p', help='DM-nucleon cross section, sigma_p in cm^2', type=float, required=True)
 #parser.add_argument('-sigma_SI','--sigma_SI', help='Cross section in cm^2', type = float, default=1e-34)
 parser.add_argument('-data', '--data', help='Type of data (1, 2, 3)', type=int, default = 1)
 #parser.add_argument('-lat', '--lat', help='Detector latitude', type=float, default=45.454)
 parser.add_argument('-out_dir', '-out_dir', help='Output directory', type=str, required=True)
+parser.add_argument('-hemisphere', '-hemisphere', help="N or S", type=str, required=True)
 
 args = parser.parse_args()
 
@@ -38,12 +39,14 @@ cmd = "cd "+myDir+" ; "
 sig_list = np.logspace(-37, -30, 15)
 
 if (rank < 15):
-    cmd += " ./calcContour " + str(args.m_x) + " " + str(sig_list[rank]) + " " + str(args.data) + " 0 45.454 " + args.out_dir + "_N ; "
-    cmd += " ./calcContour " + str(args.m_x) + " " + str(sig_list[rank]) + " " + str(args.data) + " 1 45.454 " + args.out_dir + "_N ; "
-    cmd += " ./calcContour " + str(args.m_x) + " " + str(sig_list[rank]) + " " + str(args.data) + " 0 -37.07 " + args.out_dir + "_S; " 
-    cmd += " ./calcContour " + str(args.m_x) + " " + str(sig_list[rank]) + " " + str(args.data) + " 1 -37.07 " + args.out_dir + "_S" 
+    if (args.hemisphere == "N"):
+        cmd += " ./calcContour " + str(args.m_x) + " " + str(sig_list[rank]) + " " + str(args.data) + " 0 45.454 " + args.out_dir + "_N ; "
+        cmd += " ./calcContour " + str(args.m_x) + " " + str(sig_list[rank]) + " " + str(args.data) + " 1 45.454 " + args.out_dir + "_N ; "
+    elif (args.hemisphere == "S"):
+        cmd += " ./calcContour " + str(args.m_x) + " " + str(sig_list[rank]) + " " + str(args.data) + " 0 -37.07 " + args.out_dir + "_S; " 
+        cmd += " ./calcContour " + str(args.m_x) + " " + str(sig_list[rank]) + " " + str(args.data) + " 1 -37.07 " + args.out_dir + "_S" 
 
-cmd += " >> script_output"
+#cmd += " >> script_output"
     
 sts = call(cmd,shell=True)
 comm.Barrier()

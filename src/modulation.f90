@@ -15,7 +15,8 @@ parameter (vesc = 544d0)
       
 !Sizes of grids in v, angle, etc.
 integer :: Nv, Nang, Nsigma, Nmass
-parameter (Nv = 200)
+parameter (Nv = 300)
+!parameter (Nv = 50)
 !parameter (Nang = 180)
 parameter (Nang = 36)
 parameter (Nsigma = 10)
@@ -67,7 +68,7 @@ subroutine initialise_modulation
         !Initialise densities
         do i_m = 1, Nmass
             !First do the 'free' case (sigma << 1e-36)
-            rho_list(i_m,1,:) = (/ (0.0, i_ang = 1, Nang) /) + 0.3
+            rho_list(i_m,1,:) = (/ (0.0, i_ang = 1, Nang) /) + 0.4
             !Then read the other results from file
             do i_sig = 2, Nsigma
                 write(sigstr, '(i0)') int(LOG10(sigma_vals(i_sig)))
@@ -240,7 +241,7 @@ function interp_rho_scalar(mass, sigma, angle) result(rho)
         c0 = c00*(1-yd) + c10*yd
         c1 = c01*(1-yd) + c11*yd
         
-        rho = c0*(1-zd) + c1*zd
+        rho = (c0*(1-zd) + c1*zd)*4d0/3d0
     
         !rho = c0*(1-yd) + c1*yd
     
@@ -316,6 +317,7 @@ function interp_eta_scalar(ind_m, sigma, angle, v)
     
         ind_v = ceiling((v - vmin)*(size(vel_grid)-1)/(vmax - vmin))
         ind_ang = ceiling(angle/5)
+        
         ind_sig = 1
         !write(*,*) angle, ind_ang
         do while (sigma_vals(ind_sig+1) < sigma)
