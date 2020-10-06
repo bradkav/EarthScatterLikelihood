@@ -1,4 +1,4 @@
-program calcContour
+program testLikes
 
 use stat
 
@@ -58,12 +58,15 @@ rho_b = 0.4d0
 
 !Number of points in the p-value matrix
 nrho = 5000
-nsig = 1000
+nsig = 3
 allocate(p_val_rho(nrho))
 allocate(p_val(nrho,nsig))
+allocate(likes_grid(nrho,nsig))
 allocate(m_bf(nrho,nsig))
 allocate(rho_i(nrho))
 allocate(sigma_j(nsig))
+
+allocate(N_events_tot(nrho,nsig))
 
 !Output files
 
@@ -98,14 +101,18 @@ write(*,*) "    File ID: "//trim(adjustl(ID_str))
 
 call system('mkdir -p results/' //trim(adjustl(outpath)))
 
-open (unit = 12, file = "results/"//trim(adjustl(outpath))//"/stat_prho_"//trim(adjustl(ID_str)))
-open (unit = 11, file = "results/"//trim(adjustl(outpath))//"/stat_mbf_"//trim(adjustl(ID_str)))
-open (unit = 10, file = "results/"//trim(adjustl(outpath))//"/stat_p_"//trim(adjustl(ID_str)))
-open (unit = 9, file = "results/"//trim(adjustl(outpath))//"/stat_rho_"//trim(adjustl(ID_str)))
-open (unit = 8, file = "results/"//trim(adjustl(outpath))//"/stat_sigma_"//trim(adjustl(ID_str)))
-open (unit = 7, file = "results/"//trim(adjustl(outpath))//"/stat_info_"//trim(adjustl(ID_str)))
+open (unit = 14, file = "results/"//trim(adjustl(outpath))//"/Ne_test.txt")
+open (unit = 13, file = "results/"//trim(adjustl(outpath))//"/mbf_test.txt")
+!open (unit = 12, file = "results/"//trim(adjustl(outpath))//"/stat_prho_"//trim(adjustl(ID_str)))
+open (unit = 11, file = "results/"//trim(adjustl(outpath))//"/like_test.txt")
+open (unit = 10, file = "results/"//trim(adjustl(outpath))//"/p_test.txt")
+open (unit = 9, file = "results/"//trim(adjustl(outpath))//"/rho_test.txt")
+open (unit = 8, file = "results/"//trim(adjustl(outpath))//"/sig_test.txt")
+!open (unit = 7, file = "results/"//trim(adjustl(outpath))//"/stat_info_"//trim(adjustl(ID_str)))
 
 
+!open( unit = 10, file = "p_test.txt")
+!open( unit = 11, file = "like_test.txt")
 
 write(*,*) " "
 !Read in the data tables for the daily modulations
@@ -125,36 +132,45 @@ else
 end if
 
 do j = 1, nrho
-  write(10,'(1000E12.4)') p_val(j,1:nsig)
+  write(10,'(3E12.4)') p_val(j,1:nsig)
  
-  if (FIX_MASS.ne.1) then
-    write(11,'(1000E12.4)') m_bf(j,1:nsig)
-  end if
+  !if (FIX_MASS.ne.1) then
+    write(11,'(3E12.4)') likes_grid(j,1:nsig)
+    !end if
+
+    write(14,'(3E12.4)') N_events_tot(j,1:nsig)
+    if (FIX_MASS.ne.1) then
+        write(13,'(3E12.4)') m_bf(j,1:nsig)
+    end if
+    
 end do
 
 do j = 1, nrho
-  write(9,*) rho_i(j)
-  write(12,*) p_val_rho(j)
+    write(9,*) rho_i(j)
 end do
 
 do j = 1, nsig
-  write(8,*) sigma_j(j)
+    write(8,*) sigma_j(j)
 end do
 
-write(7,*) m_x,x,nu_tot   
+!write(7,*) m_x,x,nu_tot   
 
-close(7)
+!close(7)
 close(8)
 close(9)
 close(10)
 close(11)
-close(12)
+!close(12)
+close(13)
+close(14)
 
 deallocate(m_bf)
 deallocate(p_val)
+deallocate(likes_grid)
 deallocate(rho_i)
 deallocate(sigma_j)
 deallocate(p_val_rho)
+deallocate(N_events_tot)
 
-end program calcContour
+end program testLikes
 

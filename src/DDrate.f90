@@ -12,11 +12,13 @@ parameter (amu = 931.5d3) !Define conversion factor from amu-->keV
 
 
 integer :: N_smooth
-parameter (N_smooth = 11)
+parameter (N_smooth = 20)
       
 contains      
       
 !=======================================================================
+
+
 
 ! Minimum velocity 
 function vmin(E, A, m_x)
@@ -120,10 +122,14 @@ function dRdE(E, t, A, m_x, sigma_SI)
     double precision :: t, angle
 
     angle = calcIsoAngle(t, lon_det, lat_det)
-
+    !angle = 0.5*pi
+    !angle = 0
+    
     !For light DM, we set the form factor equal to 1
     !For consistency with DAMASCUS
     int_factor = sigma_SI*A**2 !*calcSIFormFactor(E, A)
+
+
     
     !
     dRdE = (interp_rho_scalar(m_x, sigma_SI, angle)/rho0)*rate_prefactor(m_x) &
@@ -290,13 +296,11 @@ function Nevents_short(E0, E1, t0, t1, A, m_x, sigma_SI)
     double precision :: A, m_x, sigma_SI, Nevents_short
     double precision :: E0, E1, t0, t1
     integer :: Nt
-    integer :: NE
     
     parameter (Nt = 12)
-    parameter (NE = 20)
     
-    double precision :: tlist(Nt), Elist(NE), tmp(Nt)
-    double precision :: integvals(NE, Nt), reslist(NE)
+    double precision :: tlist(Nt), Elist(N_smooth), tmp(Nt)
+    double precision :: integvals(N_smooth, Nt), reslist(N_smooth)
     double precision :: dt
     
     
@@ -304,14 +308,14 @@ function Nevents_short(E0, E1, t0, t1, A, m_x, sigma_SI)
     integer :: i_t, i_E
     tlist = linspace(t0, t1, Nt)
 
-    Elist = 10**(linspace(log10(E_min), log10(E_max), NE))
+    Elist = 10**(linspace(log10(E_min), log10(E_max), N_smooth))
     
-    do i_E = 1, NE
+    do i_E = 1, N_smooth
         reslist(i_E) = resolution_integrated(Elist(i_E), E0, E1)
     end do 
     
     ! Calculate the rate (including resolution) on a grid of (E, t) values
-    do i_E = 1, NE
+    do i_E = 1, N_smooth
         do i_t = 1, Nt
             integvals(i_E, i_t) = reslist(i_E)*dRdE(Elist(i_E), tlist(i_t), A, m_x, sigma_SI)
         end do

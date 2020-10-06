@@ -19,9 +19,11 @@ double precision :: E_th, sigma_E, E_min, E_max
 !Here, E_th is the threshold energy
 !Sigma_E is the energy resolution
 !all in keV
-parameter (E_th = 100d-3)
+!parameter (E_th = 100d-3)
+parameter (E_th = 75d-3)
 parameter (sigma_E = 25d-3)
-parameter (E_max = 1d0)
+!parameter (E_max = 1d0)
+parameter (E_max = 0.5d0)
 
 !Don't change this...
 !E_min is the minimum energy required for 
@@ -30,10 +32,12 @@ parameter (E_min = 1d-5)
             
 !Background parameters
 !Events per keV per kg per day (flat spectrum)
-double precision :: BG_rate
-!parameter (BG_rate = 1.0)
-parameter (BG_rate = 10.0)
+double precision :: BG_flat, BG_R0, BG_E0
+parameter (BG_flat = 8.0d3)
+!parameter (BG_rate = 10.0)
 !parameter (BG_rate = 1d-5)
+parameter (BG_R0 = 2.2d8)
+parameter (BG_E0 = 25d-3) !25 eV characteristic energy
 
 !Mass number
 double precision :: A_det
