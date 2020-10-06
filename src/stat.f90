@@ -358,15 +358,20 @@ contains
 
     !This should be nmx = 250 for the full calculations
     integer, parameter :: nmx = 1000
+    integer, parameter :: nrefine = 5
     double precision :: x,y,p,q
     double precision :: dzero
-    double precision :: sigma_b, sigma, rho, sig_min, sig_max, rho_min, rho_max, mx_min, mx_max, mx_test, N_tot
+    double precision :: sigma_b, sigma, rho, sig_min, sig_max, rho_min, rho_max, mx_min, mx_max, mx_mid,mx_test, N_tot
     double precision :: sigma_old, N_binned(N_tbins,N_Ebins), N_exp_old(N_tbins,N_Ebins), N_exp, par, par2, lam_A, lam_1D
     double precision :: Lambda, maxLambda
+    double precision :: u, umin, umax
     double precision :: N_BG(N_Ebins)
-    double precision, allocatable :: N_grid(:,:,:,:)
-    double precision, allocatable :: sig_list(:), mx_list(:)
-    double precision, allocatable :: mx_grid(:,:)
+    double precision :: mx_list(nmx), mx_refine(nrefine), likes_refine(nrefine)
+    double precision, allocatable :: sig_list(:), N_grid(:,:,:,:)
+    integer :: temp(1)
+    
+    integer :: DO_REFINE
+    
     real :: start,finish
     integer :: i,j,l,m,i_t,i_E
     !For a dark matter particle mass m_x, it gives a matrix of p-values for rejecting a hypothetized 
@@ -374,13 +379,14 @@ contains
     !respectively
 
     allocate(sig_list(nsig))
-    allocate(mx_list(nmx))
 
     allocate(N_grid(N_tbins, N_Ebins, nmx, nsig))
 
     !write(*,*) x
 
     !write(*,*) m_x, x
+
+    DO_REFINE = 0
 
     sigma_b = x
     sig_b   = sigma_b
@@ -407,11 +413,32 @@ contains
        sig_list(i) = 10**(log10(sig_min) + (log10(sig_max)-log10(sig_min))*dble(i-1)/dble(nsig-1))
     end do
 
-    !DEFINE M_X GRID HERE!!!
-    
     do i = 1, nmx
-       mx_list(i) = 10**(log10(mx_min) + (log10(mx_max)-log10(mx_min))*dble(i-1)/dble(nmx-1))
+        !mx_list(i) = mx_min + (mx_max - mx_min)*dble(i-1)/dble(nmx-1)
+        mx_list(i) = 10**(log10(mx_min) + (log10(mx_max)-log10(mx_min))*dble(i-1)/dble(nmx-1))
     end do
+
+    !DEFINE M_X GRID HERE!!!
+    !mx_mid = 0.1d0
+    !do i = 1, 249
+    !    umin = LOG(mx_mid - mx_min)
+    !    umax = LOG(1d-4)
+    !    u = umin + (umax-umin)*dble(i-1)/dble(249-1)
+    !    mx_list(i) = mx_mid - EXP(u)
+    !    !write(*,*) u, umin, umax, mx_list(i)
+    !end do
+    !mx_list(250) = mx_mid
+    !
+    !do i = 1, 250
+    !    umin = LOG(1d-4)
+    !    umax = LOG(mx_max - mx_mid)
+    !    u = umin + (umax-umin)*dble(i-1)/dble(250-1)
+    !    mx_list(i+250) = mx_mid + EXP(u) 
+    !    !write(*,*) u, umin, umax, mx_list(i+250)
+    !   !mx_list(i) = 10**(log10(mx_min) + (log10(mx_max)-log10(mx_min))*dble(i-1)/dble(nmx-1))
+    !   !mx_list(i) = 
+    !end do
+    !write(*,*) mx_list
 
     
     !write(*,*) sig_list
@@ -560,7 +587,7 @@ contains
              mx_test = mx_list(l)
              !mx_test = mx_min + (mx_max-mx_min)*dble(l-1)/dble(nmx-1) 
 
-             !Noncentrality parameter generalising Eq. (20) in Cowan et al., Eur. Phys. J. C (2011) 71: 1554
+
              if (data.eq.1) then !Energy + time
 
                 par    = 0.d0
@@ -568,14 +595,7 @@ contains
                 do i_t = 1, N_tbins
                    do i_E = 1, N_Ebins
 
-                      !if (sigma.eq.sigma_old) then
-                      !   N_exp = (rho/rho0)*N_exp_old(i_t, i_E)
-                      !else
-
                       N_exp = (rho/rho0)*N_grid(i_t, i_E, l, j)
-                      !write(*,*) N_exp
-                      !N_exp_old(i_t, i_E) = (rho0/rho)*N_exp
-                      !end if
 
                       if (N_exp < 0) then
                          N_exp = 1.0d-30
@@ -668,8 +688,22 @@ contains
              !lam_A  = par !This is indeed delta log L
 
           end do !End of the loop over mx
-          !write(*,*) " "
-
+          
+          if (DO_REFINE == 1) then
+          
+              !Time to refine:
+              mx_refine = linspace(m_bf(i,j)*0.95, m_bf(i,j)*1.05, nrefine)
+              do l = 1, nrefine
+                  likes_refine(l) = calcLike(mx_refine(l), sigma, rho, data, N_binned, N_BG)
+              end do 
+          
+              if (MAXVAL(likes_refine) > lam_A) then
+                  lam_A = MAXVAL(likes_refine)
+                  temp = MAXLOC(likes_refine)
+                  m_bf(i,j) = 1d0*mx_refine(temp(1))
+              end if
+          end if
+          
           likes_grid(i, j) = lam_A
           
           Lambda = -2.d0 * lam_A
@@ -703,6 +737,8 @@ contains
 
        end do
 
+       !Noncentrality parameter generalising Eq. (20) in Cowan et al., Eur. Phys. J. C (2011) 71: 1554
+
        Lambda = -2.d0 * lam_1D
 
        pnonc = Lambda
@@ -719,8 +755,6 @@ contains
  
     end do
 
-    deallocate(mx_list)
-    deallocate(mx_grid)
     deallocate(sig_list)
     deallocate(N_grid)
 
@@ -728,5 +762,133 @@ contains
     !write(*,*) finish-start
 
   end subroutine p_value_profiled
+  
+  !-------------------------------
+  !-------------------------------
+  !-------------------------------
+  
+  function calcLike(mx, sigma, rho, data, N_binned, N_BG)
+      
+      double precision, intent(in) :: mx, sigma, rho
+      double precision, intent(in) :: N_binned(N_tbins,N_Ebins), N_BG(N_Ebins)
+      integer, intent(in) :: data
+      
+      double precision :: calcLike
+      double precision :: N_grid(N_tbins, N_Ebins)
+      double precision :: N_exp, par, par2
+      
+      integer :: i_t, i_E
+      
+      do i_t = 1, N_tbins
+         do i_E = 1, N_Ebins
+
+            !if (sigma.eq.sigma_old) then
+            !   N_exp = (rho/rho0)*N_exp_old(i_t, i_E)
+            !else
+            N_grid(i_t, i_E) = m_det*t_exp*Nevents_short(E_edges(i_E), E_edges(i_E+1), &
+                 t_edges(i_t), t_edges(i_t+1), A_det, mx, sigma)
+
+            !N_exp_old(i_t, i_E) = (rho0/rho)*N_exp
+            !end if
+
+            if (N_grid(i_t, i_E) < 0) then
+               N_grid(i_t, i_E) = 1d-30
+            end if
+
+         end do
+      end do
+      
+      
+      if (data.eq.1) then !Energy + time
+
+         par    = 0.d0
+         N_exp  = 0
+         do i_t = 1, N_tbins
+            do i_E = 1, N_Ebins
+
+               N_exp = (rho/rho0)*N_grid(i_t, i_E)
+
+               if (N_exp < 0) then
+                  N_exp = 1.0d-30
+               end if
+               
+               N_exp = N_exp + N_BG(i_E)*(t_edges(i_t+1) - t_edges(i_t))*t_exp*m_det
+
+               !N_tot = N_tot + N_exp
+               
+               par = par + N_binned(i_t, i_E) - N_exp + N_binned(i_t, i_E)*log(N_exp/N_binned(i_t, i_E))
+
+            end do
+         end do
+
+      else if (data.eq.2) then !Time only 
+
+         par    = 0.d0
+         par2   = 0.d0
+         do i_t = 1, N_tbins
+
+            N_exp  = 0.d0
+            do i_E = 1, N_Ebins
+
+               !if (sigma.eq.sigma_old) then
+               !   par2 = (rho/rho0)*N_exp_old(i_t, i_E)
+               !else
+               par2 = (rho/rho0)*N_grid(i_t, i_E)
+               !N_exp_old(i_t, i_E) = (rho0/rho)*par2
+               !end if
+
+               par2 = par2 + N_BG(i_E)*(t_edges(i_t+1) - t_edges(i_t))*t_exp*m_det
+
+               N_exp = N_exp + par2
+
+            end do
+
+            if (N_exp < 0) then
+               N_exp = 0d0
+            end if
+            
+            !N_tot = N_tot + N_exp
+            
+            par = par + N_binned(i_t, 1) - N_exp + N_binned(i_t, 1)*log(N_exp/N_binned(i_t, 1))
+
+         end do
+
+      else if (data.eq.3) then !Energy only 
+
+         par    = 0.d0
+         par2   = 0.d0
+         do i_E = 1, N_Ebins
+
+            N_exp  = 0.d0
+            do i_t = 1, N_tbins
+
+               !if (sigma.eq.sigma_old) then
+               !   par2 = (rho/rho0)*N_exp_old(i_t, i_E)
+               !else
+               par2 = (rho/rho0)*N_grid(i_t, i_E)
+               !N_exp_old(i_t, i_E) = (rho0/rho)*par2
+               !end if
+
+               par2 = par2 + N_BG(i_E)*(t_edges(i_t+1) - t_edges(i_t))*t_exp*m_det
+
+               N_exp = N_exp + par2
+
+            end do
+
+            if (N_exp < 0) then
+               N_exp = 0d0
+            end if
+
+            !N_tot = N_tot + N_exp
+            
+            par = par + N_binned(1, i_E) - N_exp + N_binned(1, i_E)*log(N_exp/N_binned(1, i_E)) 
+
+         end do
+
+      end if
+      
+      calcLike = 1d0*par
+      
+  end function calcLike
 
 end module stat

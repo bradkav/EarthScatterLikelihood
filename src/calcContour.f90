@@ -58,7 +58,7 @@ rho_b = 0.4d0
 
 !Number of points in the p-value matrix
 nrho = 5000
-nsig = 1000
+nsig = 500
 allocate(p_val_rho(nrho))
 allocate(p_val(nrho,nsig))
 allocate(m_bf(nrho,nsig))
@@ -125,10 +125,10 @@ else
 end if
 
 do j = 1, nrho
-  write(10,'(1000E12.4)') p_val(j,1:nsig)
+  write(10,'(500E12.4)') p_val(j,1:nsig)
  
   if (FIX_MASS.ne.1) then
-    write(11,'(1000E12.4)') m_bf(j,1:nsig)
+    write(11,'(500E12.4)') m_bf(j,1:nsig)
   end if
 end do
 
