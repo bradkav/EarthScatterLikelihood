@@ -26,11 +26,12 @@ parameter (E_max = 1d0)
 !Don't change this...
 !E_min is the minimum energy required for 
 !integrals over all energies...
-parameter (E_min = 1d-4)
+parameter (E_min = 1d-5)
             
 !Background parameters
 !Events per keV per kg per day (flat spectrum)
 double precision :: BG_rate
+!parameter (BG_rate = 1.0)
 parameter (BG_rate = 10.0)
 !parameter (BG_rate = 1d-5)
 

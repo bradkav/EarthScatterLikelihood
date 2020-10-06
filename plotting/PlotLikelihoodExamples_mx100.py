@@ -37,8 +37,9 @@ mpl.rcParams['legend.edgecolor'] = 'inherit'
 #---------------
 
 parser = argparse.ArgumentParser(description='...')
-parser.add_argument('-m_x', '--m_x', help='DM mass in GeV', default = 0.2)
+parser.add_argument('-m_x', '--m_x', help='DM mass in GeV', type=float, default = 0.2)
 parser.add_argument('-hemisphere','--hemisphere', help='Hemisphere of the experiment (N or S)', type=str, default="N")
+parser.add_argument('-sigtext', '--sigtext', type=str, default="")
 args = parser.parse_args()
 
 hemisphere = args.hemisphere
@@ -68,33 +69,34 @@ ax.spines['left'].set_color('none')
 ax.spines['right'].set_color('none')
 ax.tick_params(labelcolor='w', top=False, bottom=False, left=False, right=False)
 
-file_labels = ["A", "E", "C", "D"]
+file_labels = ["A", "B", "C", "D"]
 
-sig_labels = [r"5 \times 10^{-35}", r"7.0 \times 10^{-35}", r"1 \times 10^{-34}", r"2 \times 10^{-34}"]
+#sig_labels = [r"5 \times 10^{-35}", r"8 \times 10^{-35}", r"1 \times 10^{-34}", r"2 \times 10^{-34}"]
 
-ratio_labels = [r"0.5 ", r"0.85 ", r"", r"2 "]
+ratio_labels = [r"0.5 ", r"0.7 ", r"", r"2 "]
 
-m_list = np.linspace(0.0581, 0.5, 500)
-rho_list = np.linspace(0.01, 1.0, 90)
+m_list = np.geomspace(0.0581, 0.5, 500)
+rho_list = np.linspace(0.01, 1.0, 1000)
 
 for i in range(4):
     
-    m, rho, L = np.loadtxt("../results/example_" + hemisphere + "_" + file_labels[i] + ".txt", unpack=True, usecols=(0, 2,3))
-    L_grid = L.reshape(90, 100)
+    m, rho, L = np.loadtxt("../results/example_mx100_" + args.sigtext + "_" + hemisphere + "_" + file_labels[i] + ".txt", unpack=True, usecols=(0, 2,3))
+    L_grid = L.reshape(1000, 500)
     
     cont = axes[i].contourf(m_list, rho_list, np.clip(L_grid, -20, 0.1), levels=np.linspace(-20, 0, 11))
-    irho,im = np.unravel_index(np.argmax(L_grid), (90, 100))
+    irho,im = np.unravel_index(np.argmax(L_grid), (1000, 500))
     
-    axes[i].plot([0.2, 0.2], [0.01, 0.8], linestyle='--',color='w')
-    
+    axes[i].plot([m_x, m_x], [0.15, 1.0], linestyle='--',color='w')
+    axes[i].axhline(0.4, linestyle='--',color='w')
     axes[i].plot(m_list[im], rho_list[irho],"k^", mew=2, ms=4)
 
+    axes[i].set_xscale('log')
     if (i > 0):
         axes[i].get_yaxis().set_ticklabels([])
-    axes[i].text(0.3, 0.92, file_labels[i], color='w', ha='center', va='center', fontsize=18)
-    axes[i].set_xticks([0.1, 0.2, 0.3, 0.4, 0.5])
-    axes[i].set_xticklabels([" ", "0.2", " ", "0.4", " "])
-    axes[i].tick_params(axis='x', colors='white')
+
+    axes[i].set_xticks([0.06, 0.07, 0.08, 0.09, 0.1, 0.2, 0.3, 0.4, 0.5])
+    axes[i].set_xticklabels([" "," ", " ", " ", "0.1", "0.2", "", "0.4", " "])
+    axes[i].tick_params(axis='x', colors='white', labelsize=16)
     axes[i].tick_params(axis='y', colors='white')
     axes[i].tick_params(labelcolor='k')
     axes[i].spines['top'].set_color('white')
@@ -105,7 +107,8 @@ for i in range(4):
     
     #axes[i].text(0.3, 0.07, r'$' + sig_labels[i] + '\, \mathrm{cm}^2$', color='w', ha='center', va='center', fontsize=12)
     #0.3, 0.07
-    axes[i].text(0.3, 0.85, r"$\sigma_{p}^{\mathrm{SI}} = " + ratio_labels[i] + " \,\sigma_{p}^{\mathrm{SI}}{}'$",color='w', ha='center', va='center', fontsize=13)
+    axes[i].text(0.5, 0.07, r"$\sigma_{p}^{\mathrm{SI}} = " + ratio_labels[i] + " \,\sigma_{p}^{\mathrm{SI}}{}'$",color='w', ha='center', va='center', fontsize=13,transform=axes[i].transAxes)
+    axes[i].text(0.5, 0.15, file_labels[i], color='w', ha='center', va='center', fontsize=18, transform=axes[i].transAxes)
     
 axes[1].text(0.2, 1.02,lat_text,fontsize=14)
     
@@ -117,6 +120,6 @@ ax.set_xlabel(r'$m_\chi$ [GeV]')
 axes[0].set_ylabel(r'$\rho_\chi$ [GeV/cm$^3$]')
 
     
-plt.savefig("../plots/Likelihood_examples_" + hemisphere + ".pdf", bbox_inches='tight')
+plt.savefig("../plots/Likelihood_examples_mx100_" + args.sigtext + "_" + hemisphere + ".pdf", bbox_inches='tight')
 plt.show()
 

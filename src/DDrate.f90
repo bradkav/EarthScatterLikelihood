@@ -7,7 +7,7 @@ use expt, only: resolution, resolution_integrated, lon_det, lat_det, sigma_E, E_
 implicit none
 
 double precision :: rho0, amu
-parameter (rho0 = 3d-1)
+parameter (rho0 = 4d-1)
 parameter (amu = 931.5d3) !Define conversion factor from amu-->keV
 
 
@@ -293,7 +293,7 @@ function Nevents_short(E0, E1, t0, t1, A, m_x, sigma_SI)
     integer :: NE
     
     parameter (Nt = 12)
-    parameter (NE = 10)
+    parameter (NE = 20)
     
     double precision :: tlist(Nt), Elist(NE), tmp(Nt)
     double precision :: integvals(NE, Nt), reslist(NE)
