@@ -20,8 +20,8 @@ double precision :: E_th, sigma_E, E_min, E_max
 !Sigma_E is the energy resolution
 !all in keV
 !parameter (E_th = 100d-3)
-parameter (E_th = 75d-3)
-parameter (sigma_E = 25d-3)
+parameter (E_th = 100d-3)
+parameter (sigma_E = 33d-3)
 !parameter (E_max = 1d0)
 parameter (E_max = 0.5d0)
 

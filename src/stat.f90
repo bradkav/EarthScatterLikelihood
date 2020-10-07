@@ -379,7 +379,6 @@ contains
     !respectively
 
     allocate(sig_list(nsig))
-
     allocate(N_grid(N_tbins, N_Ebins, nmx, nsig))
 
     !write(*,*) x

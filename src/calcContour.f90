@@ -65,6 +65,9 @@ allocate(m_bf(nrho,nsig))
 allocate(rho_i(nrho))
 allocate(sigma_j(nsig))
 
+allocate(likes_grid(nrho,nsig))
+allocate(N_events_tot(nrho,nsig))
+
 !Output files
 
 write(*,*) "    Benchmark"

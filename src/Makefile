@@ -5,11 +5,12 @@ FFLAGS = -O3 -std=f95 -fall-intrinsics
 
 OBJECTS = rnglib.o ranlib_poisson.o LabFuncs.o utils.o expt.o  modulation.o DDrate.o like.o cdf.o d1mach.o dzero.o stat.o
 
-testLikes: $(OBJECTS)
-	$(FC) $(FFLAGS) -o ../testLikes testLikes.f90 $(OBJECTS)
 
 calcContour: $(OBJECTS)
 	$(FC) $(FFLAGS) -o ../calcContour calcContour.f90 $(OBJECTS)
+
+testLikes: $(OBJECTS)
+	$(FC) $(FFLAGS) -o ../testLikes testLikes.f90 $(OBJECTS)
 
 testSpectra: $(OBJECTS)
 	$(FC) $(FFLAGS) -o ../testSpectra testSpectra.f90 $(OBJECTS)

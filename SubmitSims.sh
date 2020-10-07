@@ -19,7 +19,7 @@ module load slurm-tools
 
 export SLURM_CPU_BIND=none
 
-ID="Final_75eV_res25eV_EdeBG_linB"
+ID="Final_100eV_res33eV_EdeBG_linC"
 
 #time mpirun -np 16 python2.7 RunMPI_Contours.py -m_x 0.100 -data 1 -out_dir ${ID}1 -hemisphere N
 #time mpirun -np 16 python2.7 RunMPI_Contours.py -m_x 0.100 -data 1 -out_dir ${ID}1 -hemisphere S

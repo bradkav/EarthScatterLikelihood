@@ -61,11 +61,12 @@ nrho = 5000
 nsig = 3
 allocate(p_val_rho(nrho))
 allocate(p_val(nrho,nsig))
-allocate(likes_grid(nrho,nsig))
+
 allocate(m_bf(nrho,nsig))
 allocate(rho_i(nrho))
 allocate(sigma_j(nsig))
 
+allocate(likes_grid(nrho,nsig))
 allocate(N_events_tot(nrho,nsig))
 
 !Output files
