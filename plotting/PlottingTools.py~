@@ -7,8 +7,6 @@ from scipy.integrate import cumtrapz, quad
 from scipy.interpolate import interp1d
 from scipy.stats import chi2
 
-from scipy.ndimage import uniform_filter
-
 import os
 
 rootdir = "../results/"
@@ -27,8 +25,8 @@ def plotContour_single(m_x, sigma, outpath, col='C0', ls='solid', overlay_mass=F
     #print(np.min(p_grid))
     sig_grid, rho_grid = np.meshgrid(sig_list, rho_list)
 
-    print(0.4 - np.min(rho_grid[p_grid > 0.05]), np.max(rho_grid[p_grid > 0.05]) - 0.4)
-    print(sigma - np.min(sig_grid[p_grid > 0.05]), np.max(sig_grid[p_grid > 0.05]) - sigma)    
+    print(sig_grid(p_grid > 0.05))
+    
     #print(p_grid.shape)
     
     if (overlay_mass):
@@ -53,42 +51,12 @@ def plotContour_single(m_x, sigma, outpath, col='C0', ls='solid', overlay_mass=F
         
         plt.contour(sig_grid2, rho_grid2, p_grid2, levels = (0.05,), colors=col, linewidths=1.5, linestyles='--')
         
-    p_smooth = uniform_filter(p_grid, size=1)
-        
-    plt.contour(sig_grid, rho_grid, p_smooth, levels = (0.05,), colors=col, linewidths=1.5, linestyles=ls)
-    if (fill_contour):
-        plt.contourf(sig_grid, rho_grid, p_smooth, levels = (0.05,1), colors=col, alpha=0.5)
-
-
-def plotContour_modulation(m_x, sigma, outpath, col='C0', ls='solid', fixed_mass=False):
-    #print(np.geomspace(0.05, 0.5, 9))
-    if (fixed_mass):
-        ID_str = "m%d_lsig%6.2f_mfix.txt"%(1000*m_x, np.log10(sigma))
-    else:
-        ID_str = "m%d_lsig%6.2f_mprof.txt"%(1000*m_x, np.log10(sigma))
-    
-    if not (os.path.isfile(rootdir + outpath + "/stat_sigma_" + ID_str)):
-        ID_str = "m%d_lsig%6.2f.txt"%(1000*m_x, np.log10(sigma))
-    
-    sig_list = np.loadtxt(rootdir + outpath + "/stat_sigma_" + ID_str)
-    rho_list = np.loadtxt(rootdir + outpath + "/stat_rho_" + ID_str)
-    p_grid = np.loadtxt(rootdir + outpath + "/stat_p_" + ID_str)
-
-    #print(np.min(p_grid))
-    sig_grid, rho_grid = np.meshgrid(sig_list, rho_list)
-
-    #print(0.4 - np.min(rho_grid[p_grid > 0.05]), np.max(rho_grid[p_grid > 0.05]) - 0.4)
-    #print(sigma - np.min(sig_grid[p_grid > 0.05]), np.max(sig_grid[p_grid > 0.05]) - sigma)    
-    #print(p_grid.shape)
-        
     plt.contour(sig_grid, rho_grid, p_grid, levels = (0.05,), colors=col, linewidths=1.5, linestyles=ls)
-    plt.contourf(sig_grid, rho_grid, p_grid, levels = (0.05,1), colors=col, alpha=0.5)
+    if (fill_contour):
+        plt.contourf(sig_grid, rho_grid, p_grid, levels = (0.05,1), colors=col, alpha=0.5)
 
-def plotContour_nomodulation(m_x, sigma, outpath, col='C0', ls='dashed', fixed_mass = False):
-    if (fixed_mass):
-        ID_str = "m%d_lsig%6.2f_mfix.txt"%(1000*m_x, np.log10(sigma))
-    else:
-        ID_str = "m%d_lsig%6.2f_mprof.txt"%(1000*m_x, np.log10(sigma))
+def plotContour_nomodulation(m_x, sigma, outpath, col='C0', ls='dashed'):
+    ID_str = "m%d_lsig%6.2f_mprof.txt"%(1000*m_x, np.log10(sigma))
     
     if not (os.path.isfile(rootdir + outpath + "/stat_sigma_" + ID_str)):
         ID_str = "m%d_lsig%6.2f.txt"%(1000*m_x, np.log10(sigma))

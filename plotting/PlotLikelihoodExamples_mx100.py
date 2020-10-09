@@ -56,10 +56,10 @@ fig =  plt.figure(figsize=(7,5))
 
 ax = fig.add_subplot(111) 
 axes = []
-axes.append(fig.add_subplot(141))
-axes.append(fig.add_subplot(142))
-axes.append(fig.add_subplot(143))
-axes.append(fig.add_subplot(144))
+axes.append(fig.add_subplot(131))
+axes.append(fig.add_subplot(132))
+axes.append(fig.add_subplot(133))
+#axes.append(fig.add_subplot(144))
 
 plt.subplots_adjust(wspace=0.1)
 
@@ -69,22 +69,24 @@ ax.spines['left'].set_color('none')
 ax.spines['right'].set_color('none')
 ax.tick_params(labelcolor='w', top=False, bottom=False, left=False, right=False)
 
-file_labels = ["A", "B", "C", "D"]
+file_labels = ["A", "B", "C"]#, "D"]
 
 #sig_labels = [r"5 \times 10^{-35}", r"8 \times 10^{-35}", r"1 \times 10^{-34}", r"2 \times 10^{-34}"]
 
-ratio_labels = [r"0.5 ", r"0.7 ", r"", r"2 "]
+ratio_labels = [r"0.7 ", r"", r"1.5"]
 
-m_list = np.geomspace(0.0581, 0.5, 500)
+m_list = np.geomspace(0.0581, 0.5, 1000)
 rho_list = np.linspace(0.01, 1.0, 1000)
 
-for i in range(4):
+L_clip = -50
+
+for i in range(3):
     
-    m, rho, L = np.loadtxt("../results/example_mx100_" + args.sigtext + "_" + hemisphere + "_" + file_labels[i] + ".txt", unpack=True, usecols=(0, 2,3))
-    L_grid = L.reshape(1000, 500)
+    m, rho, L = np.loadtxt("../results/example_mx100_" + args.sigtext + "_" + hemisphere + "_" + file_labels[i] + ".txt", unpack=True, usecols=(0, 1,2))
+    L_grid = L.reshape(1000, 1000).T
     
-    cont = axes[i].contourf(m_list, rho_list, np.clip(L_grid, -20, 0.1), levels=np.linspace(-20, 0, 11))
-    irho,im = np.unravel_index(np.argmax(L_grid), (1000, 500))
+    cont = axes[i].contourf(m_list, rho_list, np.clip(L_grid, L_clip, 0.1), levels=np.linspace(L_clip, 0, 11))
+    irho,im = np.unravel_index(np.argmax(L_grid), (1000, 1000))
     
     axes[i].plot([m_x, m_x], [0.15, 1.0], linestyle='--',color='w')
     axes[i].axhline(0.4, linestyle='--',color='w')
@@ -110,7 +112,7 @@ for i in range(4):
     axes[i].text(0.5, 0.07, r"$\sigma_{p}^{\mathrm{SI}} = " + ratio_labels[i] + " \,\sigma_{p}^{\mathrm{SI}}{}'$",color='w', ha='center', va='center', fontsize=13,transform=axes[i].transAxes)
     axes[i].text(0.5, 0.15, file_labels[i], color='w', ha='center', va='center', fontsize=18, transform=axes[i].transAxes)
     
-axes[1].text(0.2, 1.02,lat_text,fontsize=14)
+axes[1].text(0.05, 1.02,lat_text,fontsize=14)
     
 cb_ax = fig.add_axes([0.94, 0.09, 0.02, 0.8])
 cbar = fig.colorbar(cont, cax=cb_ax, label=r'$\Delta \log \mathcal{L}$')
