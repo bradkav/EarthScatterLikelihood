@@ -1,5 +1,5 @@
 #!/bin/bash
-
+1;95;0c
 #SBATCH -N 1 --ntasks-per-node=16  
 #SBATCH -t 12:00:00                                                                                                                                       
 #SBATCH -p normal                                                                                                                                          
@@ -19,9 +19,9 @@ module load slurm-tools
 
 export SLURM_CPU_BIND=none
 
-ID="Final_100eV_res33eV_EdeBG_linC"
+ID="Final_60eV_res18eV_EdeBG"
 
-#time mpirun -np 16 python2.7 RunMPI_Contours.py -m_x 0.100 -data 1 -out_dir ${ID}1 -hemisphere N
-#time mpirun -np 16 python2.7 RunMPI_Contours.py -m_x 0.100 -data 1 -out_dir ${ID}1 -hemisphere S
-#time mpirun -np 16 python2.7 RunMPI_Contours.py -m_x 0.100 -data 3 -out_dir ${ID}3 -hemisphere N
-time mpirun -np 16 python2.7 RunMPI_Contours.py -m_x 0.100 -data 3 -out_dir ${ID}3 -hemisphere S
+#time mpirun -np 16 python2.7 RunMPI_Contours.py -m_x 0.250 -data 1 -out_dir ${ID}1 -hemisphere N
+#time mpirun -np 16 python2.7 RunMPI_Contours.py -m_x 0.250 -data 1 -out_dir ${ID}1 -hemisphere S
+#time mpirun -np 16 python2.7 RunMPI_Contours.py -m_x 0.250 -data 3 -out_dir ${ID}3 -hemisphere N
+time mpirun -np 16 python2.7 RunMPI_Contours.py -m_x 0.250 -data 3 -out_dir ${ID}3 -hemisphere S

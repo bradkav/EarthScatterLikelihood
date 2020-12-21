@@ -27,8 +27,8 @@ def plotContour_single(m_x, sigma, outpath, col='C0', ls='solid', overlay_mass=F
     #print(np.min(p_grid))
     sig_grid, rho_grid = np.meshgrid(sig_list, rho_list)
 
-    #print(0.4 - np.min(rho_grid[p_grid > 0.05]), np.max(rho_grid[p_grid > 0.05]) - 0.4)
-    #print(sigma - np.min(sig_grid[p_grid > 0.05]), np.max(sig_grid[p_grid > 0.05]) - sigma)    
+    print("    > Local density errors:", "-", 0.4 - np.min(rho_grid[p_grid > 0.05]), ",+", np.max(rho_grid[p_grid > 0.05]) - 0.4)
+    print("    > Cross-section errors (frac):", "-", (sigma - np.min(sig_grid[p_grid > 0.05]))/sigma, ", +", (np.max(sig_grid[p_grid > 0.05]) - sigma)/sigma)    
     #print(p_grid.shape)
     
     if (overlay_mass):
