@@ -78,7 +78,7 @@ ratio_labels = [r"0.7 ", r"", r"1.5"]
 m_list = np.geomspace(0.0581, 0.5, 1000)
 rho_list = np.linspace(0.01, 1.0, 1000)
 
-L_clip = -50
+L_clip = -20
 
 for i in range(3):
     
