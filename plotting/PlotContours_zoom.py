@@ -81,7 +81,7 @@ plt.title(r'$m_\chi^\prime = ' + m_str + ' \,\mathrm{MeV}$; ' + lat_text)#; ' + 
 #sig_list = np.geomspace(1e-37, 1e-30, 8)
 
 #sig_list = [10**-31.0,]
-sig_list = [10**-34,]
+sig_list = [10**-33.5,]
 
 ADD_SLICES = True
 
@@ -95,14 +95,14 @@ if (ADD_SLICES):
     #plt.axvline(5e-35, linestyle=':', color='k')
     #plt.text(3.8e-35, 0.90, "A", color='k')
     
-    plt.axvline(7.0e-35, linestyle=':', color='k')
-    plt.text(5.4e-35, 0.07, "A", color='k')
+    plt.axvline(7.0e-34, linestyle=':', color='k')
+    plt.text(5.4e-34, 0.07, "A", color='k')
     
-    plt.axvline(1e-34, linestyle=':', color='k')
-    plt.text(1.1e-34, 0.07, "B", color='k')
+    plt.axvline(1e-33, linestyle=':', color='k')
+    plt.text(1.1e-33, 0.07, "B", color='k')
     
-    plt.axvline(1.5e-34, linestyle=':', color='k')
-    plt.text(1.7e-34, 0.07, "C", color='k')
+    plt.axvline(1.5e-33, linestyle=':', color='k')
+    plt.text(1.7e-33, 0.07, "C", color='k')
 
 plt.xlim(sig_list[0]/10, sig_list[0]*10)
 #plt.xlim(3e-36, 3e-34)
