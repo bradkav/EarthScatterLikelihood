@@ -29,7 +29,7 @@ def plotContour_single(m_x, sigma, outpath, col='C0', ls='solid', overlay_mass=F
 
     print("    > Local density errors:", "-", 0.4 - np.min(rho_grid[p_grid > 0.05]), ",+", np.max(rho_grid[p_grid > 0.05]) - 0.4)
     print("    > Cross-section errors (frac):", "-", (sigma - np.min(sig_grid[p_grid > 0.05]))/sigma, ", +", (np.max(sig_grid[p_grid > 0.05]) - sigma)/sigma)    
-    #print(p_grid.shape)
+ #print(p_grid.shape)
     
     if (overlay_mass):
         m_grid = np.loadtxt(rootdir + outpath + "/stat_mbf_" + ID_str)
@@ -53,11 +53,11 @@ def plotContour_single(m_x, sigma, outpath, col='C0', ls='solid', overlay_mass=F
         
         plt.contour(sig_grid2, rho_grid2, p_grid2, levels = (0.05,), colors=col, linewidths=1.5, linestyles='--')
         
-    #p_smooth = uniform_filter(p_grid, size=5)
+    p_smooth = uniform_filter(p_grid, size=1)
         
-    plt.contour(sig_grid, rho_grid, p_grid, levels = (0.05,), colors=col, linewidths=1.5, linestyles=ls)
+    plt.contour(sig_grid, rho_grid, p_smooth, levels = (0.05,), colors=col, linewidths=1.5, linestyles=ls)
     if (fill_contour):
-        plt.contourf(sig_grid, rho_grid, p_grid, levels = (0.05,1), colors=col, alpha=0.5)
+        plt.contourf(sig_grid, rho_grid, p_smooth, levels = (0.05,1), colors=col, alpha=0.5)
 
 
 def plotContour_modulation(m_x, sigma, outpath, col='C0', ls='solid', fixed_mass=False):

@@ -6,11 +6,16 @@ FFLAGS = -O3 -std=f95 -fall-intrinsics
 OBJECTS = rnglib.o ranlib_poisson.o LabFuncs.o utils.o expt.o  modulation.o DDrate.o like.o cdf.o d1mach.o dzero.o stat.o
 
 
-calcContour: $(OBJECTS)
-	$(FC) $(FFLAGS) -o ../calcContour calcContour.f90 $(OBJECTS)
+
+calcMassLikes: $(OBJECTS)
+	$(FC) $(FFLAGS) -o ../calcMassLikes calcMassLikes.f90 $(OBJECTS)
+
 
 testLikes: $(OBJECTS)
 	$(FC) $(FFLAGS) -o ../testLikes testLikes.f90 $(OBJECTS)
+
+calcContour: $(OBJECTS)
+	$(FC) $(FFLAGS) -o ../calcContour calcContour.f90 $(OBJECTS)
 
 testSpectra: $(OBJECTS)
 	$(FC) $(FFLAGS) -o ../testSpectra testSpectra.f90 $(OBJECTS)
@@ -21,7 +26,9 @@ GenerateEvents: $(OBJECTS)
 GenerateEvents_Asimov: $(OBJECTS)
 	$(FC) $(FFLAGS) -o ../GenerateEvents_Asimov GenerateEvents_Asimov.f90 $(OBJECTS)
 
-all: GenerateEvents GenerateEvents_Asimov testSpectra calcContour testLikes
+#all: GenerateEvents GenerateEvents_Asimov testSpectra calcContour testLikes calcMassLikes
+
+all: calcContour testLikes calcMassLikes
 
 %.o: %.f90
 	$(FC) $(FFLAGS) -c -o $@ $^
@@ -34,3 +41,4 @@ clean:
 	rm -f ../testSpectra 
 	rm -f ../calcContour
 	rm -f ../testLikes
+	rm -f ../calcMassLikes

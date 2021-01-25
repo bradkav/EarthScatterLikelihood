@@ -10,7 +10,7 @@ module stat
   double precision :: m_x, rho_b, sig_b, nu_tot
 
   double precision, dimension(:,:), allocatable :: p_val, m_bf, likes_grid, N_events_tot
-  double precision, dimension(:), allocatable :: rho_i, sigma_j, p_val_rho
+  double precision, dimension(:), allocatable :: rho_i, mx_i, sigma_j, p_val_rho
 
   integer :: data,i_Eg,i_tg
 
@@ -417,30 +417,6 @@ contains
         mx_list(i) = 10**(log10(mx_min) + (log10(mx_max)-log10(mx_min))*dble(i-1)/dble(nmx-1))
     end do
 
-    !DEFINE M_X GRID HERE!!!
-    !mx_mid = 0.1d0
-    !do i = 1, 249
-    !    umin = LOG(mx_mid - mx_min)
-    !    umax = LOG(1d-4)
-    !    u = umin + (umax-umin)*dble(i-1)/dble(249-1)
-    !    mx_list(i) = mx_mid - EXP(u)
-    !    !write(*,*) u, umin, umax, mx_list(i)
-    !end do
-    !mx_list(250) = mx_mid
-    !
-    !do i = 1, 250
-    !    umin = LOG(1d-4)
-    !    umax = LOG(mx_max - mx_mid)
-    !    u = umin + (umax-umin)*dble(i-1)/dble(250-1)
-    !    mx_list(i+250) = mx_mid + EXP(u) 
-    !    !write(*,*) u, umin, umax, mx_list(i+250)
-    !   !mx_list(i) = 10**(log10(mx_min) + (log10(mx_max)-log10(mx_min))*dble(i-1)/dble(nmx-1))
-    !   !mx_list(i) = 
-    !end do
-    !write(*,*) mx_list
-
-    
-    !write(*,*) sig_list
 
     !Calculate background in each bin
     do i_E = 1, N_Ebins
@@ -889,5 +865,134 @@ contains
       calcLike = 1d0*par
       
   end function calcLike
+  
+  
+  subroutine massLikes(sigma_b, sigma_test)
+      
+      double precision, intent(in) :: sigma_b, sigma_test
+      double precision :: mx_min, mx_max, rho_min, rho_max
+      integer, parameter :: nmx = 1000
+      integer :: i, j, l, i_E, i_t
+      double precision :: N_BG(N_Ebins), N_binned(N_tbins, N_Ebins)
+      double precision :: mx_list(nmx)
+      double precision :: par, N_exp, mx_test, rho
+      double precision, allocatable :: N_grid(:,:,:)
+      
+      allocate(N_grid(N_tbins, N_Ebins, nmx))
+      !allocate(lambda_grid(nmx, nrho))
+      
+      mx_min = 0.0581d0
+      mx_max = 0.5d0
+      
+      rho_min = 0.01d0
+      rho_max = 1.0d0
+
+      do i = 1, nmx
+          mx_list(i) = 10**(log10(mx_min) + (log10(mx_max)-log10(mx_min))*dble(i-1)/dble(nmx-1))
+      end do
+      
+      !Calculate background in each bin
+      do i_E = 1, N_Ebins
+         N_BG(i_E) = BG_R0*BG_E0*(exp(-E_edges(i_E)/BG_E0) - exp(-E_edges(i_E+1)/BG_E0))
+         N_BG(i_E) = N_BG(i_E) + BG_flat*(E_edges(i_E + 1) - E_edges(i_E))
+      end do
+      
+      write(*,*) "> Calculating Asimov data..."
+      !Asimov data
+      nu_tot = 0.d0
+      do i_t = 1, N_tbins
+        do i_E = 1, N_Ebins
+           !write(*,*) rho_b/rho0, sigma_b
+           N_binned(i_t, i_E) = (rho_b/rho0)*m_det*t_exp*Nevents_short(E_edges(i_E), E_edges(i_E+1), &
+                t_edges(i_t), t_edges(i_t+1), A_det, m_x, sigma_b)
+
+           if (N_binned(i_t, i_E) < 0) then
+              N_binned(i_t, i_E) = 1.0d-30
+           end if
+         
+           N_binned(i_t, i_E) = N_binned(i_t, i_E) + N_BG(i_E)*(t_edges(i_t+1) - t_edges(i_t))*t_exp*m_det
+
+
+           !nu_tot = nu_tot + N_binned(i_t, i_E)
+
+        end do
+      end do
+      
+      write(*,*) "> Calculating grid of event numbers..."
+      !Grid of expected event numbers:
+      do l = 1, nmx
+        mx_test = mx_list(l)
+        !mx_test = mx_min + (mx_max-mx_min)*dble(l-1)/dble(nmx-1) 
+
+        do i_t = 1, N_tbins
+           do i_E = 1, N_Ebins
+
+              !if (sigma.eq.sigma_old) then
+              !   N_exp = (rho/rho0)*N_exp_old(i_t, i_E)
+              !else
+              N_grid(i_t, i_E, l) = m_det*t_exp*Nevents_short(E_edges(i_E), E_edges(i_E+1), &
+                   t_edges(i_t), t_edges(i_t+1), A_det, mx_test, sigma_test)
+
+              !N_exp_old(i_t, i_E) = (rho0/rho)*N_exp
+              !end if
+
+              if (N_grid(i_t, i_E, l) < 0) then
+                 N_grid(i_t, i_E, l) = 1d-30
+              end if
+
+            end do
+        end do
+     end do
+     
+     write(*,*) "> Calculating likelihood grid..."
+     !p-value matrix
+     do i = 1, nrho
+         !write(*,*) i
+
+        rho      = (rho_min + (rho_max-rho_min)*dble(i-1)/dble(nrho-1))
+        rho_i(i) = rho
+
+
+        do l = 1, nmx
+            !write(*,*) l
+
+          mx_test = mx_list(l)
+          mx_i(l) = mx_list(l)
+          !mx_test = mx_min + (mx_max-mx_min)*dble(l-1)/dble(nmx-1) 
+
+          par    = 0.d0
+          N_exp  = 0
+          do i_t = 1, N_tbins
+             do i_E = 1, N_Ebins
+
+                N_exp = (rho/rho0)*N_grid(i_t, i_E, l)
+
+                if (N_exp < 0) then
+                   N_exp = 1.0d-30
+                end if
+               
+                N_exp = N_exp + N_BG(i_E)*(t_edges(i_t+1) - t_edges(i_t))*t_exp*m_det
+               
+                par = par + N_binned(i_t, i_E) - N_exp + N_binned(i_t, i_E)*log(N_exp/N_binned(i_t, i_E))
+
+             end do
+          end do
+          !write(*,*) "> Writing likelihood"
+
+          likes_grid(l, i) = par
+          !write(*,*) "> Written likelihood"
+
+       end do !End of the loop over mx
+        
+
+      
+ 
+     end do
+     
+     deallocate(N_grid)
+      
+      
+  end subroutine massLikes
+  
 
 end module stat
