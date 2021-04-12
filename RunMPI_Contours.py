@@ -24,6 +24,7 @@ parser.add_argument('-data', '--data', help='Type of data (1, 2, 3)', type=int, 
 #parser.add_argument('-lat', '--lat', help='Detector latitude', type=float, default=45.454)
 parser.add_argument('-out_dir', '-out_dir', help='Output directory', type=str, required=True)
 parser.add_argument('-hemisphere', '-hemisphere', help="N or S", type=str, required=True)
+parser.add_argument('-exe', '-exe', type=str, default="calcContour")
 
 args = parser.parse_args()
 
@@ -40,11 +41,11 @@ sig_list = np.logspace(-37, -30, 15)
 
 if (rank < 15):
     if (args.hemisphere == "N"):
-        cmd += " ./calcContour " + str(args.m_x) + " " + str(sig_list[rank]) + " " + str(args.data) + " 0 45.454 " + args.out_dir + "_N ; "
-        cmd += " ./calcContour " + str(args.m_x) + " " + str(sig_list[rank]) + " " + str(args.data) + " 1 45.454 " + args.out_dir + "_N ; "
+        cmd += " ./" + args.exe + " "  + str(args.m_x) + " " + str(sig_list[rank]) + " " + str(args.data) + " 0 45.454 " + args.out_dir + "_N ; "
+        cmd += " ./" + args.exe + " "  + str(args.m_x) + " " + str(sig_list[rank]) + " " + str(args.data) + " 1 45.454 " + args.out_dir + "_N ; "
     elif (args.hemisphere == "S"):
-        cmd += " ./calcContour " + str(args.m_x) + " " + str(sig_list[rank]) + " " + str(args.data) + " 0 -37.07 " + args.out_dir + "_S; " 
-        cmd += " ./calcContour " + str(args.m_x) + " " + str(sig_list[rank]) + " " + str(args.data) + " 1 -37.07 " + args.out_dir + "_S" 
+        cmd += " ./" + args.exe + " "  + str(args.m_x) + " " + str(sig_list[rank]) + " " + str(args.data) + " 0 -37.07 " + args.out_dir + "_S; " 
+        cmd += " ./" + args.exe + " "  + str(args.m_x) + " " + str(sig_list[rank]) + " " + str(args.data) + " 1 -37.07 " + args.out_dir + "_S" 
 
 #cmd += " >> script_output"
     

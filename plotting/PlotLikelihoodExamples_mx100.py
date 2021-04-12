@@ -61,8 +61,6 @@ axes.append(fig.add_subplot(132))
 axes.append(fig.add_subplot(133))
 #axes.append(fig.add_subplot(144))
 
-plt.subplots_adjust(wspace=0.1)
-
 ax.spines['top'].set_color('none')
 ax.spines['bottom'].set_color('none')
 ax.spines['left'].set_color('none')
@@ -73,12 +71,12 @@ file_labels = ["A", "B", "C"]#, "D"]
 
 #sig_labels = [r"5 \times 10^{-35}", r"8 \times 10^{-35}", r"1 \times 10^{-34}", r"2 \times 10^{-34}"]
 
-ratio_labels = [r"0.7 ", r"", r"1.5"]
+ratio_labels = [r"0.3 ", r"", r"3.1"]
 
 m_list = np.geomspace(0.0581, 0.5, 1000)
 rho_list = np.linspace(0.01, 1.0, 1000)
 
-L_clip = -20
+L_clip = -40
 
 for i in range(3):
     
@@ -121,7 +119,10 @@ cbar = fig.colorbar(cont, cax=cb_ax, label=r'$\Delta \log \mathcal{L}$')
 ax.set_xlabel(r'$m_\chi$ [GeV]')
 axes[0].set_ylabel(r'$\rho_\chi$ [GeV/cm$^3$]')
 
+#plt.tight_layout()
+plt.subplots_adjust(wspace=0.1)
+
     
-plt.savefig("../plots/Likelihood_examples_mx100_" + args.sigtext + "_" + hemisphere + ".pdf", bbox_inches='tight')
+plt.savefig("../plots/Likelihood_examples_mx100_" + args.sigtext + "_" + hemisphere + ".pdf")
 plt.show()
 

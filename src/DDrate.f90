@@ -2,7 +2,7 @@ module DDrate
 
 use utils      
 use modulation
-use expt, only: resolution, resolution_integrated, lon_det, lat_det, sigma_E, E_min, E_max
+use expt, only: resolution, resolution_integrated, lon_det, lat_det, sigma_E, E_min, E_max, A_det, mass_frac, N_elements
 
 implicit none
 
@@ -117,29 +117,34 @@ end function calcSIFormFactor
 ! Spin-Independent recoil rate
 ! including energy and time
 ! depending on Earth-scattering effects
-function dRdE(E, t, A, m_x, sigma_SI)
-    double precision :: E, A, m_x, sigma_SI, dRdE, int_factor
+function dRdE(E, t, m_x, sigma_SI)
+    double precision :: E, m_x, sigma_SI, dRdE, int_factor
     double precision :: t, angle
 
+    integer :: i
+    
     angle = calcIsoAngle(t, lon_det, lat_det)
     !angle = 0.5*pi
     !angle = 0
-    
-    !For light DM, we set the form factor equal to 1
-    !For consistency with DAMASCUS
-    int_factor = sigma_SI*A**2 !*calcSIFormFactor(E, A)
 
+    dRdE = 0
+    do i = 1, N_elements
+       !For light DM, we set the form factor equal to 1
+       !For consistency with DAMASCUS
+       int_factor = sigma_SI*A_det(i)**2 !*calcSIFormFactor(E, A)
+       
+        dRdE = dRdE + mass_frac(i)*(interp_rho_scalar(m_x, sigma_SI, angle)/rho0)*rate_prefactor(m_x) &
+            *int_factor*interp_eta_full(m_x, sigma_SI, angle, vmin(E, A_det(i), m_x))
+
+    end do
 
     
-    !
-    dRdE = (interp_rho_scalar(m_x, sigma_SI, angle)/rho0)*rate_prefactor(m_x) &
-        *int_factor*interp_eta_full(m_x, sigma_SI, angle, vmin(E, A, m_x))
 end function dRdE
 
 !Standard Spin-Independent recoil rate
 ! as above, but includes resolution correction
-function dRdE_res(E, t, A, m_x, sigma_SI)
-    double precision :: E, A, m_x, sigma_SI, dRdE_res
+function dRdE_res(E, t, m_x, sigma_SI)
+    double precision :: E, m_x, sigma_SI, dRdE_res
     double precision :: t
     
     double precision :: Elist(N_smooth), reslist(N_smooth), dRdElist(N_smooth)
@@ -155,7 +160,7 @@ function dRdE_res(E, t, A, m_x, sigma_SI)
         if (Elist(i) < 0) then
             dRdElist(i) = 0
         else
-            dRdElist(i) = dRdE(Elist(i), t, A, m_x, sigma_SI)
+            dRdElist(i) = dRdE(Elist(i), t, m_x, sigma_SI)
         end if
     end do
     
@@ -165,17 +170,25 @@ end function dRdE_res
 
 !Standard Spin-Independent recoil rate
 ! 'Free' (i.e. no Earth-scattering effects)
-function dRdE_free(E, A, m_x, sigma_SI)
-    double precision :: E, A, m_x, sigma_SI, dRdE_free, int_factor
+function dRdE_free(E, m_x, sigma_SI)
+    double precision :: E, m_x, sigma_SI, dRdE_free, int_factor
 
-    int_factor = sigma_SI*calcSIFormFactor(E, A)*(A**2)
+    integer :: i
+
+    dRdE_free = 0
     
-    dRdE_free = rate_prefactor(m_x)*int_factor*calcEta_free(vmin(E, A, m_x))
+    do i = 1, N_elements
+
+        int_factor = sigma_SI*(A_det(i)**2) !*calcSIFormFactor(E, A)
+    
+        dRdE_free = dRdE_free + mass_frac(i)*rate_prefactor(m_x)*int_factor*calcEta_free(vmin(E, A_det(i), m_x))
+
+    end do
 end function dRdE_free
 
 ! Recoil rate
 ! Including resolution and integrating over time [t0, t1]
-function dRdE_res_tint(E, t0, t1, A, m_x, sigma_SI)
+function dRdE_res_tint(E, t0, t1, m_x, sigma_SI)
     double precision :: A, m_x, sigma_SI, dRdE_res_tint
     double precision :: E, t0, t1
     integer :: Nt = 200
@@ -206,7 +219,7 @@ function dRdE_res_tint(E, t0, t1, A, m_x, sigma_SI)
     !write(*,*) Elist
     do i_t = 1, Nt
         do i_E = 1, N_smooth
-            integvals(i_E, i_t) = resolution(E, Elist(i_E))*dRdE(Elist(i_E), tlist(i_t), A, m_x, sigma_SI)
+            integvals(i_E, i_t) = resolution(E, Elist(i_E))*dRdE(Elist(i_E), tlist(i_t), m_x, sigma_SI)
         end do
     end do
     
@@ -228,7 +241,7 @@ end function dRdE_res_tint
 
 ! Total number of events in the energy range [E0, E1]
 ! and over time interval [t0, t1]
-function Nevents(E0, E1, t0, t1, A, m_x, sigma_SI)
+function Nevents(E0, E1, t0, t1,  m_x, sigma_SI)
     double precision :: A, m_x, sigma_SI, Nevents
     double precision :: E0, E1, t0, t1
     integer :: Nt = 200
@@ -269,7 +282,7 @@ function Nevents(E0, E1, t0, t1, A, m_x, sigma_SI)
     ! Calculate the rate (including resolution) on a grid of (E, t) values
     do i_E = 1, NE
         do i_t = 1, Nt
-            integvals(i_E, i_t) = reslist(i_E)*dRdE(Elist(i_E), tlist(i_t), A, m_x, sigma_SI)
+            integvals(i_E, i_t) = reslist(i_E)*dRdE(Elist(i_E), tlist(i_t),  m_x, sigma_SI)
         end do
     end do
     
@@ -292,7 +305,7 @@ end function Nevents
 
 ! Total number of events in the energy range [E0, E1]
 ! and over a (short ~ days) time interval [t0, t1]
-function Nevents_short(E0, E1, t0, t1, A, m_x, sigma_SI)
+function Nevents_short(E0, E1, t0, t1,  m_x, sigma_SI)
     double precision :: A, m_x, sigma_SI, Nevents_short
     double precision :: E0, E1, t0, t1
     integer :: Nt
@@ -317,7 +330,7 @@ function Nevents_short(E0, E1, t0, t1, A, m_x, sigma_SI)
     ! Calculate the rate (including resolution) on a grid of (E, t) values
     do i_E = 1, N_smooth
         do i_t = 1, Nt
-            integvals(i_E, i_t) = reslist(i_E)*dRdE(Elist(i_E), tlist(i_t), A, m_x, sigma_SI)
+            integvals(i_E, i_t) = reslist(i_E)*dRdE(Elist(i_E), tlist(i_t), m_x, sigma_SI)
         end do
     end do
     
@@ -332,8 +345,8 @@ function Nevents_short(E0, E1, t0, t1, A, m_x, sigma_SI)
 end function Nevents_short
 
 ! Number of events in recoil range [E0, E1] at fixed time t
-function Nevents_fixedt(E0, E1, t, A, m_x, sigma_SI)
-    double precision :: A, m_x, sigma_SI, Nevents_fixedt
+function Nevents_fixedt(E0, E1, t, m_x, sigma_SI)
+    double precision :: m_x, sigma_SI, Nevents_fixedt
     double precision :: E0, E1, t
     integer :: NE = 100
     double precision, allocatable ::  Elist(:)
@@ -348,7 +361,7 @@ function Nevents_fixedt(E0, E1, t, A, m_x, sigma_SI)
     Elist = 10**(linspace(log10(E0), log10(E1), NE))
     
     do i_E = 1, NE
-        integvals(i_E) = resolution_integrated(Elist(i_E))*dRdE(Elist(i_E), t, A, m_x, sigma_SI)
+        integvals(i_E) = resolution_integrated(Elist(i_E))*dRdE(Elist(i_E), t, m_x, sigma_SI)
     end do
     
     Nevents_fixedt = trapz(Elist, integvals)

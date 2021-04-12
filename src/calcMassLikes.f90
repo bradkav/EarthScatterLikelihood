@@ -6,9 +6,9 @@ use expt, only: lat_det
 
 implicit none
 
-integer :: i, j, nmx, i_E, i_t, N_bench, FIX_MASS
+integer :: i, j, i_E, i_t, N_bench, FIX_MASS
 
-double precision :: mx_min, mx_max, x, tol, sigma_b_in, sigma_test_in, rho, par, N_exp, sig_min, sig_max, pval
+double precision :: x, tol, sigma_b_in, sigma_test_in, rho, par, N_exp, sig_min, sig_max, pval
 
 double precision :: dzero
 double precision :: day

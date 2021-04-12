@@ -6,9 +6,9 @@ use expt, only: lat_det
 
 implicit none
 
-integer :: i, j, nmx, i_E, i_t, N_bench, FIX_MASS
+integer :: i, j, i_E, i_t, N_bench, FIX_MASS
 
-double precision :: mx_min, mx_max, x, tol, sigma_b, rho, par, N_exp, sig_min, sig_max, pval
+double precision ::  x, tol, sigma_b, rho, par, N_exp, sig_min, sig_max, pval
 
 double precision :: dzero
 double precision :: day
@@ -69,6 +69,10 @@ allocate(sigma_j(nsig))
 allocate(likes_grid(nrho,nsig))
 allocate(N_events_tot(nrho,nsig))
 
+nmx = 2000
+mx_min = 0.0581d0
+mx_max = 0.5d0
+
 !Output files
 
 write(*,*) "    Benchmark"
@@ -88,7 +92,7 @@ write(sig_str, "(F6.2)") LOG10(sigma_b)
 if (FIX_MASS.eq.1) then
     write(*,*) "    Fixing DM mass..."    
     prof_str = "_mfix"
-else
+ else
     write(*,*) "    Profiling over DM mass..."
     prof_str = "_mprof"
 end if

@@ -12,6 +12,9 @@ module stat
   double precision, dimension(:,:), allocatable :: p_val, m_bf, likes_grid, N_events_tot
   double precision, dimension(:), allocatable :: rho_i, mx_i, sigma_j, p_val_rho
 
+  double precision :: mx_min, mx_max
+  integer :: nmx
+  
   integer :: data,i_Eg,i_tg
 
   integer :: nrho,nsig
@@ -106,7 +109,7 @@ contains
           do i_E = 1, N_Ebins
 
              N_binned(i_t, i_E) = (rho_b/rho0)*m_det*t_exp*Nevents_short(E_edges(i_E), E_edges(i_E+1), &
-                  t_edges(i_t), t_edges(i_t+1), A_det, m_x, sigma_b)
+                  t_edges(i_t), t_edges(i_t+1), m_x, sigma_b)
 
              N_binned(i_t, i_E) = N_binned(i_t, i_E) + N_BG(i_E)*(t_edges(i_t+1) - t_edges(i_t))*t_exp*m_det
 
@@ -127,7 +130,7 @@ contains
 
           do i_E = 1, N_Ebins
              par = (rho_b/rho0)*m_det*t_exp*Nevents_short(E_edges(i_E), E_edges(i_E+1), &
-                  t_edges(i_t), t_edges(i_t+1), A_det, m_x, sigma_b)
+                  t_edges(i_t), t_edges(i_t+1), m_x, sigma_b)
 
              par = par + N_BG(i_E)*(t_edges(i_t+1) - t_edges(i_t))*t_exp*m_det
 
@@ -150,7 +153,7 @@ contains
 
           do i_t = 1, N_tbins
              par = (rho_b/rho0)*m_det*t_exp*Nevents_short(E_edges(i_E), E_edges(i_E+1), &
-                  t_edges(i_t), t_edges(i_t+1), A_det, m_x, sigma_b)
+                  t_edges(i_t), t_edges(i_t+1), m_x, sigma_b)
 
              par = par + N_BG(i_E)*(t_edges(i_t+1) - t_edges(i_t))*t_exp*m_det
 
@@ -179,7 +182,7 @@ contains
                 !   N_exp = (rho/rho0)*N_exp_old(i_t, i_E)
                 !else
                 N_grid(i_t, i_E, j) = m_det*t_exp*Nevents_short(E_edges(i_E), E_edges(i_E+1), &
-                     t_edges(i_t), t_edges(i_t+1), A_det, m_x, sigma)
+                     t_edges(i_t), t_edges(i_t+1), m_x, sigma)
 
                 !N_exp_old(i_t, i_E) = (rho0/rho)*N_exp
                 !end if
@@ -357,17 +360,18 @@ contains
   subroutine p_value_profiled(x)
 
     !This should be nmx = 250 for the full calculations
-    integer, parameter :: nmx = 1000
+    !integer, parameter :: nmx = 2500
     integer, parameter :: nrefine = 5
     double precision :: x,y,p,q
     double precision :: dzero
-    double precision :: sigma_b, sigma, rho, sig_min, sig_max, rho_min, rho_max, mx_min, mx_max, mx_mid,mx_test, N_tot
+    double precision :: sigma_b, sigma, rho, sig_min, sig_max, rho_min, rho_max, mx_test, N_tot
     double precision :: sigma_old, N_binned(N_tbins,N_Ebins), N_exp_old(N_tbins,N_Ebins), N_exp, par, par2, lam_A, lam_1D
     double precision :: Lambda, maxLambda
     double precision :: u, umin, umax
     double precision :: N_BG(N_Ebins)
-    double precision :: mx_list(nmx), mx_refine(nrefine), likes_refine(nrefine)
+    double precision :: mx_refine(nrefine), likes_refine(nrefine)
     double precision, allocatable :: sig_list(:), N_grid(:,:,:,:)
+    double precision, allocatable :: mx_list(:)
     integer :: temp(1)
     
     integer :: DO_REFINE
@@ -380,7 +384,8 @@ contains
 
     allocate(sig_list(nsig))
     allocate(N_grid(N_tbins, N_Ebins, nmx, nsig))
-
+    allocate(mx_list(nmx))
+    
     !write(*,*) x
 
     !write(*,*) m_x, x
@@ -391,9 +396,9 @@ contains
     sig_b   = sigma_b
 
 
-    mx_min = 0.0581d0 !with mx_min=0.1 it does not work
+    !mx_min = 0.0581d0 !with mx_min=0.1 it does not work
     !write(*,*) "Reset mass limits"
-    mx_max = 0.5d0
+    !mx_max = 0.5d0
 
     if ( (sigma_b.ge.1.d-38) .and. (sigma_b.le.1.d-30) ) then
        !write(*,*) "Check that sigma limits don't matter!"
@@ -442,7 +447,7 @@ contains
           do i_E = 1, N_Ebins
              !write(*,*) rho_b/rho0, sigma_b
              N_binned(i_t, i_E) = (rho_b/rho0)*m_det*t_exp*Nevents_short(E_edges(i_E), E_edges(i_E+1), &
-                  t_edges(i_t), t_edges(i_t+1), A_det, m_x, sigma_b)
+                  t_edges(i_t), t_edges(i_t+1), m_x, sigma_b)
 
              if (N_binned(i_t, i_E) < 0) then
                 N_binned(i_t, i_E) = 1.0d-30
@@ -464,7 +469,7 @@ contains
 
           do i_E = 1, N_Ebins
              par = (rho_b/rho0)*m_det*t_exp*Nevents_short(E_edges(i_E), E_edges(i_E+1), &
-                  t_edges(i_t), t_edges(i_t+1), A_det, m_x, sigma_b)
+                  t_edges(i_t), t_edges(i_t+1),  m_x, sigma_b)
 
              par = par + N_BG(i_E)*(t_edges(i_t+1) - t_edges(i_t))*t_exp*m_det
 
@@ -487,7 +492,7 @@ contains
 
           do i_t = 1, N_tbins
              par = (rho_b/rho0)*m_det*t_exp*Nevents_short(E_edges(i_E), E_edges(i_E+1), &
-                  t_edges(i_t), t_edges(i_t+1), A_det, m_x, sigma_b)
+                  t_edges(i_t), t_edges(i_t+1), m_x, sigma_b)
 
              par = par + N_BG(i_E)*(t_edges(i_t+1) - t_edges(i_t))*t_exp*m_det
 
@@ -526,7 +531,7 @@ contains
                 !   N_exp = (rho/rho0)*N_exp_old(i_t, i_E)
                 !else
                 N_grid(i_t, i_E, l, j) = m_det*t_exp*Nevents_short(E_edges(i_E), E_edges(i_E+1), &
-                     t_edges(i_t), t_edges(i_t+1), A_det, mx_test, sigma)
+                     t_edges(i_t), t_edges(i_t+1), mx_test, sigma)
 
                 !N_exp_old(i_t, i_E) = (rho0/rho)*N_exp
                 !end if
@@ -732,6 +737,7 @@ contains
 
     deallocate(sig_list)
     deallocate(N_grid)
+    deallocate(mx_list)
 
     call cpu_time(finish)
     !write(*,*) finish-start
@@ -761,7 +767,7 @@ contains
             !   N_exp = (rho/rho0)*N_exp_old(i_t, i_E)
             !else
             N_grid(i_t, i_E) = m_det*t_exp*Nevents_short(E_edges(i_E), E_edges(i_E+1), &
-                 t_edges(i_t), t_edges(i_t+1), A_det, mx, sigma)
+                 t_edges(i_t), t_edges(i_t+1), mx, sigma)
 
             !N_exp_old(i_t, i_E) = (rho0/rho)*N_exp
             !end if
@@ -904,7 +910,7 @@ contains
         do i_E = 1, N_Ebins
            !write(*,*) rho_b/rho0, sigma_b
            N_binned(i_t, i_E) = (rho_b/rho0)*m_det*t_exp*Nevents_short(E_edges(i_E), E_edges(i_E+1), &
-                t_edges(i_t), t_edges(i_t+1), A_det, m_x, sigma_b)
+                t_edges(i_t), t_edges(i_t+1), m_x, sigma_b)
 
            if (N_binned(i_t, i_E) < 0) then
               N_binned(i_t, i_E) = 1.0d-30
@@ -931,7 +937,7 @@ contains
               !   N_exp = (rho/rho0)*N_exp_old(i_t, i_E)
               !else
               N_grid(i_t, i_E, l) = m_det*t_exp*Nevents_short(E_edges(i_E), E_edges(i_E+1), &
-                   t_edges(i_t), t_edges(i_t+1), A_det, mx_test, sigma_test)
+                   t_edges(i_t), t_edges(i_t+1), mx_test, sigma_test)
 
               !N_exp_old(i_t, i_E) = (rho0/rho)*N_exp
               !end if

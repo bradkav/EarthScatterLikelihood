@@ -80,10 +80,10 @@ plt.title(r'$m_\chi^\prime = ' + m_str + ' \,\mathrm{MeV}$; ' + lat_text)#; ' + 
 #sig_list = np.geomspace(3.16e-37, 1e-30, 14)
 #sig_list = np.geomspace(1e-37, 1e-30, 8)
 
-#sig_list = [10**-31.0,]
-sig_list = [10**-33.5,]
+sig_list = [10**-32.5,]
+#sig_list = [10**-33.5,]
 
-ADD_SLICES = True
+ADD_SLICES = False
 
 for i, sig in enumerate(sig_list):
     IDstr = runID + data + "_" + hemisphere

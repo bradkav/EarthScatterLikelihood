@@ -126,7 +126,7 @@ subroutine loglike(Cube,slhood,binned)
                 do i_E = 1, N_Ebins
                     !Calculate expected number of events in bin
                     N_exp = t_exp*(rho/rho0)*m_det*Nevents_short(E_edges(i_E), E_edges(i_E + 1), &
-                        t_edges(i_t), t_edges(i_t + 1), A_det, m_x, sigma_SI)
+                        t_edges(i_t), t_edges(i_t + 1), m_x, sigma_SI)
             
                     !Add background rate
                     N_exp = N_exp + BG_flat*(t_edges(i_t+1) - t_edges(i_t))* &
@@ -141,7 +141,7 @@ subroutine loglike(Cube,slhood,binned)
     end if
     
     !Otherwise, do a full event-by-event likelihood
-    N_exp = (rho/rho0)*m_det*Nevents(E_min, E_max, t_start(), t_end(), A_det, m_x, sigma_SI)
+    N_exp = (rho/rho0)*m_det*Nevents(E_min, E_max, t_start(), t_end(), m_x, sigma_SI)
     N_exp = N_exp + BG_flat*(E_max - E_th)*t_exp*m_det
     
     if (N_exp < 1d-30) then
@@ -155,7 +155,7 @@ subroutine loglike(Cube,slhood,binned)
     ! Calculate event-by-event likelihood
     do i = 1, N_obs
         
-        eventlike = m_det*((rho/rho0)*dRdE_res(events_E(i), events_t(i), A_det, m_x, sigma_SI) + BG_flat)/N_exp
+        eventlike = m_det*((rho/rho0)*dRdE_res(events_E(i), events_t(i),  m_x, sigma_SI) + BG_flat)/N_exp
         if (eventlike < 1d-30) then
             slhood = -1d30
             return
@@ -202,7 +202,7 @@ subroutine loglike_Eonly(Cube,slhood,binned)
             do i_E = 1, N_Ebins
                 !Calculate expected number of events in bin
                 N_exp = t_exp*(rho/rho0)*m_det*Nevents_short(E_edges(i_E), E_edges(i_E + 1), &
-                    t_edges(1), t_edges(N_tbins+1), A_det, m_x, sigma_SI)
+                    t_edges(1), t_edges(N_tbins+1), m_x, sigma_SI)
         
                 !Add background rate
                 N_exp = N_exp + BG_flat*(E_edges(i_E+1) - E_edges(i_E))*t_exp*m_det
@@ -215,7 +215,7 @@ subroutine loglike_Eonly(Cube,slhood,binned)
     end if
     
     !Otherwise, do event-by-event likelihood
-    N_exp = (rho/rho0)*m_det*Nevents(E_min, E_max, t_start(), t_end(), A_det, m_x, sigma_SI)
+    N_exp = (rho/rho0)*m_det*Nevents(E_min, E_max, t_start(), t_end(), m_x, sigma_SI)
     N_exp = N_exp + BG_flat*(E_max - E_th)*t_exp*m_det
     
     if (N_exp < 1d-30) then
@@ -228,7 +228,7 @@ subroutine loglike_Eonly(Cube,slhood,binned)
     
     ! Calculate event-by-by event likelihood
     do i = 1, N_obs
-        eventlike = m_det*((rho/rho0)*dRdE_res_tint(events_E(i), t_start(), t_end(), A_det, m_x, sigma_SI) + BG_flat)/N_exp
+        eventlike = m_det*((rho/rho0)*dRdE_res_tint(events_E(i), t_start(), t_end(), m_x, sigma_SI) + BG_flat)/N_exp
         if (eventlike < 1d-30) then
             slhood = -1d30
             return
@@ -263,7 +263,7 @@ subroutine loglike_counts(Cube,slhood,binned)
     call initialise_modulation()
     
     
-    N_exp = (rho/rho0)*m_det*Nevents(E_min, E_max, t_start(), t_end(), A_det, m_x, sigma_SI)
+    N_exp = (rho/rho0)*m_det*Nevents(E_min, E_max, t_start(), t_end(), m_x, sigma_SI)
     N_exp = N_exp + BG_flat*(E_max - E_th)*t_exp*m_det
         
     if (N_exp < 1d-30) then
