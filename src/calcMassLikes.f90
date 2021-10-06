@@ -50,13 +50,15 @@ rho_b = 0.4d0
 
 
 !Number of points in the p-value matrix
-nrho = 1000
+nrho = 2000
 nmx = 1000
 
 allocate(rho_i(nrho))
 allocate(mx_i(nmx))
 
 allocate(likes_grid(nmx,nrho))
+
+allocate(N_events_mx(nmx))
 
 !Output files
 
@@ -117,6 +119,8 @@ close(14)
 deallocate(likes_grid)
 deallocate(rho_i)
 deallocate(mx_i)
+
+deallocate(N_events_mx)
 
 end program calcMassLikes
 

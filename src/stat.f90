@@ -10,7 +10,7 @@ module stat
   double precision :: m_x, rho_b, sig_b, nu_tot
 
   double precision, dimension(:,:), allocatable :: p_val, m_bf, likes_grid, N_events_tot
-  double precision, dimension(:), allocatable :: rho_i, mx_i, sigma_j, p_val_rho
+  double precision, dimension(:), allocatable :: rho_i, mx_i, sigma_j, p_val_rho, N_events_mx
 
   double precision :: mx_min, mx_max
   integer :: nmx
@@ -881,6 +881,8 @@ contains
       integer :: i, j, l, i_E, i_t
       double precision :: N_BG(N_Ebins), N_binned(N_tbins, N_Ebins)
       double precision :: mx_list(nmx)
+      double precision :: N_tot_temp
+      double precision :: N_tot_mod(N_tbins)
       double precision :: par, N_exp, mx_test, rho
       double precision, allocatable :: N_grid(:,:,:)
       
@@ -929,8 +931,9 @@ contains
       do l = 1, nmx
         mx_test = mx_list(l)
         !mx_test = mx_min + (mx_max-mx_min)*dble(l-1)/dble(nmx-1) 
-
+        N_tot_temp = 0d0
         do i_t = 1, N_tbins
+           N_tot_mod(i_t) = 0d0
            do i_E = 1, N_Ebins
 
               !if (sigma.eq.sigma_old) then
@@ -946,9 +949,17 @@ contains
                  N_grid(i_t, i_E, l) = 1d-30
               end if
 
-            end do
+              N_tot_temp = N_tot_temp + N_grid(i_t, i_E, l)
+              N_tot_mod(i_t) = N_tot_mod(i_t) + N_grid(i_t, i_E, l)
+           end do
+           
         end do
+          
+        write(*,*) mx_test, N_tot_temp, (MAXVAL(N_tot_mod) - MINVAL(N_tot_mod))/(MAXVAL(N_tot_mod) + MINVAL(N_tot_mod))
      end do
+
+
+
      
      write(*,*) "> Calculating likelihood grid..."
      !p-value matrix

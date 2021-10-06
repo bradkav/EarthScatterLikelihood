@@ -13,7 +13,7 @@ MASS=0.100
 #python3 PlotContours_all.py -hemisphere N -m_x $MASS -runID $ID -plottext "$TEXT"
 #python3 PlotContours_all.py -hemisphere S -m_x $MASS -runID $ID -plottext "$TEXT"
 
-#python3 PlotContours_zoom.py -m_x $MASS -hemisphere N -runID $ID 
-#python3 PlotContours_zoom.py -m_x $MASS -hemisphere S -runID $ID
+python3 PlotContours_zoom.py -m_x $MASS -hemisphere N -runID $ID 
+python3 PlotContours_zoom.py -m_x $MASS -hemisphere S -runID $ID
 
-python3 PlotLikelihoodExamples_mx100.py -m_x 0.1 -hemisphere S -sigtext "sig-32.50"
+#python3 PlotLikelihoodExamples_mx100.py -m_x 0.1 -hemisphere S -sigtext "sig-32.50"
