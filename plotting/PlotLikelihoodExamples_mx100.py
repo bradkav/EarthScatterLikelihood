@@ -74,29 +74,33 @@ file_labels = ["A", "B", "C"]#, "D"]
 ratio_labels = [r"0.3 ", r"", r"3.1"]
 
 m_list = np.geomspace(0.0581, 0.5, 1000)
-rho_list = np.linspace(0.01, 1.0, 1000)
+rho_list = np.linspace(0.01, 1.0, 2000)
 
-L_clip = -40
+L_clip = -20
 
 for i in range(3):
     
     m, rho, L = np.loadtxt("../results/example_mx100_" + args.sigtext + "_" + hemisphere + "_" + file_labels[i] + ".txt", unpack=True, usecols=(0, 1,2))
-    L_grid = L.reshape(1000, 1000).T
+    L_grid = L.reshape(1000, 2000).T
     
     cont = axes[i].contourf(m_list, rho_list, np.clip(L_grid, L_clip, 0.1), levels=np.linspace(L_clip, 0, 11))
-    irho,im = np.unravel_index(np.argmax(L_grid), (1000, 1000))
+    irho,im = np.unravel_index(np.argmax(L_grid), (2000, 1000))
     
-    axes[i].plot([m_x, m_x], [0.15, 1.0], linestyle='--',color='w')
+    axes[i].plot([m_x, m_x], [0.01, 1.0], linestyle='--',color='w')
     axes[i].axhline(0.4, linestyle='--',color='w')
-    axes[i].plot(m_list[im], rho_list[irho],"k^", mew=2, ms=4)
+    axes[i].plot(m_list[im], rho_list[irho],"r^", mew=2, ms=4)
 
-    axes[i].set_xscale('log')
+    #axes[i].set_xscale('log')
     if (i > 0):
         axes[i].get_yaxis().set_ticklabels([])
 
-    axes[i].set_xticks([0.06, 0.07, 0.08, 0.09, 0.1, 0.2, 0.3, 0.4, 0.5])
-    axes[i].set_xticklabels([" "," ", " ", " ", "0.1", "0.2", "", "0.4", " "])
-    axes[i].tick_params(axis='x', colors='white', labelsize=16)
+    axes[i].set_xlim(0.06, 0.160)
+    #axes[i].set_xticks([0.06, 0.07, 0.08, 0.09, 0.1, 0.2])#, 0.3, 0.4, 0.5])
+    axes[i].set_xticks(np.arange(0.06, 0.165, 0.01), minor=True)
+    axes[i].set_xticks([0.100, 0.150])
+    axes[i].set_xticklabels(["100", "150"])
+    #axes[i].set_xticklabels([" ","60", " ", " ", " ", "100", " ", " ", " ", " ", "150", " "])#, "", "0.4", " "])
+    axes[i].tick_params(axis='x', colors='white', labelsize=16, which='both')
     axes[i].tick_params(axis='y', colors='white')
     axes[i].tick_params(labelcolor='k')
     axes[i].spines['top'].set_color('white')
@@ -107,8 +111,8 @@ for i in range(3):
     
     #axes[i].text(0.3, 0.07, r'$' + sig_labels[i] + '\, \mathrm{cm}^2$', color='w', ha='center', va='center', fontsize=12)
     #0.3, 0.07
-    axes[i].text(0.5, 0.07, r"$\sigma_{p}^{\mathrm{SI}} = " + ratio_labels[i] + " \,\sigma_{p}^{\mathrm{SI}}{}'$",color='w', ha='center', va='center', fontsize=13,transform=axes[i].transAxes)
-    axes[i].text(0.5, 0.15, file_labels[i], color='w', ha='center', va='center', fontsize=18, transform=axes[i].transAxes)
+    axes[i].text(0.71, 0.85, r"$\sigma_{p}^{\mathrm{SI}} = " + ratio_labels[i] + " \,\sigma_{p}^{\mathrm{SI}}{}'$",color='w', ha='center', va='center', fontsize=12,transform=axes[i].transAxes)
+    axes[i].text(0.71, 0.93, file_labels[i], color='w', ha='center', va='center', fontsize=18, transform=axes[i].transAxes)
     
 axes[1].text(0.05, 1.02,lat_text,fontsize=14)
     
@@ -116,13 +120,13 @@ cb_ax = fig.add_axes([0.94, 0.09, 0.02, 0.8])
 cbar = fig.colorbar(cont, cax=cb_ax, label=r'$\Delta \log \mathcal{L}$')
 
 
-ax.set_xlabel(r'$m_\chi$ [GeV]')
+ax.set_xlabel(r'$m_\chi$ [MeV]')
 axes[0].set_ylabel(r'$\rho_\chi$ [GeV/cm$^3$]')
 
 #plt.tight_layout()
 plt.subplots_adjust(wspace=0.1)
 
     
-plt.savefig("../plots/Likelihood_examples_mx100_" + args.sigtext + "_" + hemisphere + ".pdf")
+plt.savefig("../plots/Likelihood_examples_mx100_" + args.sigtext + "_" + hemisphere + ".pdf", bbox_inches='tight')
 plt.show()
 

@@ -10,8 +10,8 @@ TEXT="\$E_\mathrm{th} = 10\,\mathrm{eV}\$; \$\sigma_E = 3\,\mathrm{eV}\$ (Sapphi
 ID="Final_10eV_res3eV_Sapphire_clip2_refine"
 MASS=0.100
 
-#python3 PlotContours_all.py -hemisphere N -m_x $MASS -runID $ID -plottext "$TEXT"
-#python3 PlotContours_all.py -hemisphere S -m_x $MASS -runID $ID -plottext "$TEXT"
+python3 PlotContours_all.py -hemisphere N -m_x $MASS -runID $ID -plottext "$TEXT"
+python3 PlotContours_all.py -hemisphere S -m_x $MASS -runID $ID -plottext "$TEXT"
 
 python3 PlotContours_zoom.py -m_x $MASS -hemisphere N -runID $ID 
 python3 PlotContours_zoom.py -m_x $MASS -hemisphere S -runID $ID
