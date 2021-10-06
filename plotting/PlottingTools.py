@@ -57,17 +57,21 @@ def plotContour_single(m_x, sigma, outpath, col='C0', ls='solid', overlay_mass=F
     if (overlay_mass):
         #m_min = 0.05
         m_min = 0.05
-        m_max = 0.5
+        m_max = 0.180
         
-        mass_contours = axis.contourf(sig_grid, rho_grid, np.log10(m_grid), alpha=0.5, levels=np.log10(np.geomspace(m_min, m_max, 17)),
-                #ticks=np.arange(50, 549, 25),
-                        cmap=plt.get_cmap('seismic'),#, norm=colors.TwoSlopeNorm(vmin=np.log10(0.05), vcenter=np.log10(0.1), vmax=np.log10(0.5)))
-                                      norm=colors.Normalize(vmin=np.log10(0.05), vmax=np.log10(0.5)))
-                                      #norm = MidpointNormalize(midpoint=np.log10(0.1),vmin=np.log10(0.05), vmax=np.log10(0.5)))
+        mass_contours = axis.contourf(sig_grid, rho_grid, np.log10(m_grid), alpha=0.5,
+                                      #levels=np.log10(np.geomspace(m_min, m_max, 17)),
+                                      levels = np.log10(np.arange(m_min, m_max+0.005, 0.01)), 
+                                      #ticks=np.arange(50, 549, 25),
+                                      cmap=plt.get_cmap('seismic'),
+                                      #norm=colors.TwoSlopeNorm(vmin=np.log10(0.05), vcenter=np.log10(0.1), vmax=np.log10(0.5)))
+                                      #norm=colors.Normalize(vmin=np.log10(m_min), vmax=np.log10(m_min)))
+                                      norm = MidpointNormalize(midpoint=np.log10(0.1),vmin=np.log10(m_min), vmax=np.log10(m_max)))
         cb = plt.colorbar(mass_contours, label=r'$\hat{m}_\chi$ [MeV]')
-        #cb.set_ticks(np.log10(np.arange(50, 549, 25)))        
+        #cb.set_ticks(np.log10(np.arange(m_min, m_max+0.005, 0.01)))
+        cb.set_ticklabels([ "60",  "80",  "100", "120", "140",  "160",  "180"])
         #cb.set_ticklabels(["0.1","", "0.2","", "0.3","", "0.4","", "0.5"])
-        cb.set_ticklabels(["50","", "90","", "160","", "280","", "500"])
+        #cb.set_ticklabels(["50","", "90","", "160","", "280","", "500"])
         
         
     if (add_fixed_mass):

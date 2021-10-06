@@ -73,7 +73,7 @@ elif (data == "3"):
 #45.5 N
 #37.1 S
 
-plt.title(r'$m_\chi^\prime = ' + m_str + ' \,\mathrm{MeV}$; ' + lat_text)#; ' + data_str)
+plt.title(r'$m_\chi^\prime = ' + m_str + ' \,\mathrm{MeV}$; ' + lat_text, fontsize=14)#; ' + data_str)
 #print(np.geomspace(0.1, 0.5, 10))
 
 #N_bench = 5
@@ -83,11 +83,11 @@ plt.title(r'$m_\chi^\prime = ' + m_str + ' \,\mathrm{MeV}$; ' + lat_text)#; ' + 
 sig_list = [10**-32.5,]
 #sig_list = [10**-33.5,]
 
-ADD_SLICES = False
+ADD_SLICES = True
 
 for i, sig in enumerate(sig_list):
     IDstr = runID + data + "_" + hemisphere
-    PT.plotContour_single(m_x, sig, IDstr, col="C0", overlay_mass=True, fill_contour=False)
+    PT.plotContour_single(m_x, sig, IDstr, col="k", overlay_mass=True, fill_contour=False)
     plt.plot(sig, 0.4, color='k', marker="+", mew=2, markersize=12)
     
 if (ADD_SLICES):
@@ -95,14 +95,14 @@ if (ADD_SLICES):
     #plt.axvline(5e-35, linestyle=':', color='k')
     #plt.text(3.8e-35, 0.90, "A", color='k')
     
-    plt.axvline(7.0e-34, linestyle=':', color='k')
-    plt.text(5.4e-34, 0.07, "A", color='k')
-    
     plt.axvline(1e-33, linestyle=':', color='k')
-    plt.text(1.1e-33, 0.07, "B", color='k')
+    plt.text(8e-34, 0.05, "A", color='k')
     
-    plt.axvline(1.5e-33, linestyle=':', color='k')
-    plt.text(1.7e-33, 0.07, "C", color='k')
+    plt.axvline(3.16e-33, linestyle=':', color='k')
+    plt.text(2.5e-33, 0.05, "B", color='k')
+    
+    plt.axvline(1e-32, linestyle=':', color='k')
+    plt.text(1.12e-32, 0.05, "C", color='k')
 
 plt.xlim(sig_list[0]/10, sig_list[0]*10)
 #plt.xlim(3e-36, 3e-34)
